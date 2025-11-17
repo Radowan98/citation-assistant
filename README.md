@@ -61,12 +61,6 @@ conda create -n citation python=3.10 -y
 conda activate citation
 ```
 
-Or using pip venv:
-
-```
-python -m venv citation
-citation\Scripts\activate
-```
 
 ---
 
@@ -90,6 +84,8 @@ pip install streamlit faiss-cpu numpy pyyaml sentence-transformers ollama pypdf
 
 These folders store your library and indexes:
 
+Should be there already. If not then:
+
 ```
 mkdir data
 mkdir data/index
@@ -102,7 +98,7 @@ mkdir data/profiles
 ---
 
 ## 🚀 6. Run the Citation Assistant
-
+If Ollama is off--
 Start Ollama in one terminal:
 
 ```
