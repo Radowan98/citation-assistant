@@ -1,0 +1,1262 @@
+[
+  {
+    "paper_id": "Chawla_2002",
+    "chunk_id": 0,
+    "text": "Journal of Arti\ufb01cial Intelligence Research 16 (2002) 321\u2013357\n\nSubmitted 09/01; published 06/02\n\nSMOTE: Synthetic Minority Over-sampling Technique\n\nNitesh V. Chawla\nDepartment of Computer Science and Engineering, ENB 118\nUniversity of South Florida\n4202 E. Fowler Ave.\nTampa, FL 33620-5399, USA\n\nKevin W. Bowyer\nDepartment of Computer Science and Engineering\n384 Fitzpatrick Hall\nUniversity of Notre Dame\nNotre Dame, IN 46556, USA\n\nLawrence O. Hall\nDepartment of Computer Science and Engineering, ENB "
+  },
+  {
+    "paper_id": "Chawla_2002",
+    "chunk_id": 1,
+    "text": "118\nUniversity of South Florida\n4202 E. Fowler Ave.\nTampa, FL 33620-5399, USA\n\nW. Philip Kegelmeyer\nSandia National Laboratories\nBiosystems Research Department, P.O. Box 969, MS 9951\nLivermore, CA, 94551-0969, USA\n\nchawla@csee.usf.edu\n\nkwb@cse.nd.edu\n\nhall@csee.usf.edu\n\nwpk@california.sandia.gov\n\nAbstract\n\nAn approach to the construction of classi\ufb01ers from imbalanced datasets is described.\nA dataset is imbalanced if the classi\ufb01cation categories are not approximately equally rep-\nresented. Often "
+  },
+  {
+    "paper_id": "Chawla_2002",
+    "chunk_id": 2,
+    "text": "real-world data sets are predominately composed of \u201cnormal\u201d examples\nwith only a small percentage of \u201cabnormal\u201d or \u201cinteresting\u201d examples. It is also the case\nthat the cost of misclassifying an abnormal (interesting) example as a normal example is\noften much higher than the cost of the reverse error. Under-sampling of the majority (nor-\nmal) class has been proposed as a good means of increasing the sensitivity of a classi\ufb01er to\nthe minority class. This paper shows that a combination of our metho"
+  },
+  {
+    "paper_id": "Chawla_2002",
+    "chunk_id": 3,
+    "text": "d of over-sampling\nthe minority (abnormal) class and under-sampling the majority (normal) class can achieve\nbetter classi\ufb01er performance (in ROC space) than only under-sampling the majority class.\nThis paper also shows that a combination of our method of over-sampling the minority class\nand under-sampling the majority class can achieve better classi\ufb01er performance (in ROC\nspace) than varying the loss ratios in Ripper or class priors in Naive Bayes. Our method\nof over-sampling the minority class "
+  },
+  {
+    "paper_id": "Chawla_2002",
+    "chunk_id": 4,
+    "text": "involves creating synthetic minority class examples.\nExperiments are performed using C4.5, Ripper and a Naive Bayes classi\ufb01er. The method\nis evaluated using the area under the Receiver Operating Characteristic curve (AUC) and\nthe ROC convex hull strategy.\n\n1. Introduction\n\nA dataset is imbalanced if the classes are not approximately equally represented. Imbalance\non the order of 100 to 1 is prevalent in fraud detection and imbalance of up to 100,000 to\n\nc(cid:13)2002 AI Access Foundation and Mor"
+  },
+  {
+    "paper_id": "Chawla_2002",
+    "chunk_id": 5,
+    "text": "gan Kaufmann Publishers. All rights reserved.\n\n\fChawla, Bowyer, Hall & Kegelmeyer\n\n1 has been reported in other applications (Provost & Fawcett, 2001). There have been\nattempts to deal with imbalanced datasets in domains such as fraudulent telephone calls\n(Fawcett & Provost, 1996), telecommunications management (Ezawa, Singh, & Norton,\n1996), text classi\ufb01cation (Lewis & Catlett, 1994; Dumais, Platt, Heckerman, & Sahami,\n1998; Mladeni\u00b4c & Grobelnik, 1999; Lewis & Ringuette, 1994; Cohen, 1995a) an"
+  },
+  {
+    "paper_id": "Chawla_2002",
+    "chunk_id": 6,
+    "text": "d detection\nof oil spills in satellite images (Kubat, Holte, & Matwin, 1998).\n\nThe performance of machine learning algorithms is typically evaluated using predictive\naccuracy. However, this is not appropriate when the data is imbalanced and/or the costs of\ndi\ufb00erent errors vary markedly. As an example, consider the classi\ufb01cation of pixels in mam-\nmogram images as possibly cancerous (Woods, Doss, Bowyer, Solka, Priebe, & Kegelmeyer,\n1993). A typical mammography dataset might contain 98% normal pix"
+  },
+  {
+    "paper_id": "Chawla_2002",
+    "chunk_id": 7,
+    "text": "els and 2% abnormal\npixels. A simple default strategy of guessing the majority class would give a predictive ac-\ncuracy of 98%. However, the nature of the application requires a fairly high rate of correct\ndetection in the minority class and allows for a small error rate in the majority class in\norder to achieve this. Simple predictive accuracy is clearly not appropriate in such situ-\nations. The Receiver Operating Characteristic (ROC) curve is a standard technique for\nsummarizing classi\ufb01er perf"
+  },
+  {
+    "paper_id": "Chawla_2002",
+    "chunk_id": 8,
+    "text": "ormance over a range of tradeo\ufb00s between true positive and false\npositive error rates (Swets, 1988). The Area Under the Curve (AUC) is an accepted tradi-\ntional performance metric for a ROC curve (Duda, Hart, & Stork, 2001; Bradley, 1997; Lee,\n2000). The ROC convex hull can also be used as a robust method of identifying potentially\noptimal classi\ufb01ers (Provost & Fawcett, 2001). If a line passes through a point on the convex\nhull, then there is no other line with the same slope passing through ano"
+  },
+  {
+    "paper_id": "Chawla_2002",
+    "chunk_id": 9,
+    "text": "ther point with a\nlarger true positive (TP) intercept. Thus, the classi\ufb01er at that point is optimal under any\ndistribution assumptions in tandem with that slope.\n\nThe machine learning community has addressed the issue of class imbalance in two ways.\nOne is to assign distinct costs to training examples (Pazzani, Merz, Murphy, Ali, Hume, &\nBrunk, 1994; Domingos, 1999). The other is to re-sample the original dataset, either by over-\nsampling the minority class and/or under-sampling the majority cla"
+  },
+  {
+    "paper_id": "Chawla_2002",
+    "chunk_id": 10,
+    "text": "ss (Kubat & Matwin,\n1997; Japkowicz, 2000; Lewis & Catlett, 1994; Ling & Li, 1998). Our approach (Chawla,\nBowyer, Hall, & Kegelmeyer, 2000) blends under-sampling of the majority class with a\nspecial form of over-sampling the minority class. Experiments with various datasets and\nthe C4.5 decision tree classi\ufb01er (Quinlan, 1992), Ripper (Cohen, 1995b), and a Naive Bayes\nClassi\ufb01er show that our approach improves over other previous re-sampling, modifying loss\nratio, and class priors approaches, usin"
+  },
+  {
+    "paper_id": "Chawla_2002",
+    "chunk_id": 11,
+    "text": "g either the AUC or ROC convex hull.\n\nSection 2 gives an overview of performance measures. Section 3 reviews the most\nclosely related work dealing with imbalanced datasets. Section 4 presents the details of\nour approach. Section 5 presents experimental results comparing our approach to other\nre-sampling approaches. Section 6 discusses the results and suggests directions for future\nwork.\n\n2. Performance Measures\n\nThe performance of machine learning algorithms is typically evaluated by a confusion"
+  },
+  {
+    "paper_id": "Chawla_2002",
+    "chunk_id": 12,
+    "text": " matrix\nas illustrated in Figure 1 (for a 2 class problem). The columns are the Predicted class and the\nrows are the Actual class. In the confusion matrix, T N is the number of negative examples\n\n322\n\n\fSMOTE\n\nPredicted\nNegative\n\nPredicted\nPositive\n\nActual\nNegative\n\nActual\nPositive\n\nTN\n\nFN\n\nFP\n\nTP\n\nFigure 1: Confusion Matrix\n\ncorrectly classi\ufb01ed (True Negatives), F P is the number of negative examples incorrectly\nclassi\ufb01ed as positive (False Positives), F N is the number of positive examples inco"
+  },
+  {
+    "paper_id": "Chawla_2002",
+    "chunk_id": 13,
+    "text": "rrectly\nclassi\ufb01ed as negative (False Negatives) and T P is the number of positive examples correctly\nclassi\ufb01ed (True Positives).\n\nPredictive accuracy is the performance measure generally associated with machine learn-\ning algorithms and is de\ufb01ned as Accuracy = (T P + T N )/(T P + F P + T N + F N ). In the\ncontext of balanced datasets and equal error costs, it is reasonable to use error rate as a\nperformance metric. Error rate is 1 \u2212 Accuracy. In the presence of imbalanced datasets\nwith unequal e"
+  },
+  {
+    "paper_id": "Chawla_2002",
+    "chunk_id": 14,
+    "text": "rror costs, it is more appropriate to use the ROC curve or other similar\ntechniques (Ling & Li, 1998; Drummond & Holte, 2000; Provost & Fawcett, 2001; Bradley,\n1997; Turney, 1996).\n\nROC curves can be thought of as representing the family of best decision boundaries for\nrelative costs of TP and FP. On an ROC curve the X-axis represents %F P = F P/(T N +F P )\nand the Y-axis represents %T P = T P/(T P +F N ). The ideal point on the ROC curve would\nbe (0,100), that is all positive examples are class"
+  },
+  {
+    "paper_id": "Chawla_2002",
+    "chunk_id": 15,
+    "text": "i\ufb01ed correctly and no negative examples are\nmisclassi\ufb01ed as positive. One way an ROC curve can be swept out is by manipulating the\nbalance of training samples for each class in the training set. Figure 2 shows an illustration.\nThe line y = x represents the scenario of randomly guessing the class. Area Under the ROC\nCurve (AUC) is a useful metric for classi\ufb01er performance as it is independent of the decision\ncriterion selected and prior probabilities. The AUC comparison can establish a dominance\n"
+  },
+  {
+    "paper_id": "Chawla_2002",
+    "chunk_id": 16,
+    "text": "relationship between classi\ufb01ers. If the ROC curves are intersecting, the total AUC is an\naverage comparison between models (Lee, 2000). However, for some speci\ufb01c cost and class\ndistributions, the classi\ufb01er having maximum AUC may in fact be suboptimal. Hence, we\nalso compute the ROC convex hulls, since the points lying on the ROC convex hull are\npotentially optimal (Provost, Fawcett, & Kohavi, 1998; Provost & Fawcett, 2001).\n\n3. Previous Work: Imbalanced datasets\n\nKubat and Matwin (1997) selectiv"
+  },
+  {
+    "paper_id": "Chawla_2002",
+    "chunk_id": 17,
+    "text": "ely under-sampled the majority class while keeping the\noriginal population of the minority class. They have used the geometric mean as a perfor-\nmance measure for the classi\ufb01er, which can be related to a single point on the ROC curve.\nThe minority examples were divided into four categories: some noise overlapping the pos-\nitive class decision region, borderline samples, redundant samples and safe samples. The\nborderline examples were detected using the Tomek links concept (Tomek, 1976). Another\n"
+  },
+  {
+    "paper_id": "Chawla_2002",
+    "chunk_id": 18,
+    "text": "\n323\n\n\fChawla, Bowyer, Hall & Kegelmeyer\n\nROC\n\n(100, 100)\n\n100\n\nIdeal point\n\nPercent\n\nTrue\n\nPositive\n\ny = x\n\nincreased undersampling\nof  the  majority class moves\nthe operating point to the\nupper right\n\noriginal  data  set\n\n0\n\nPercent  False  Positive\n\n100\n\nFigure 2: Illustration of sweeping out a ROC curve through under-sampling.\n\nIncreased\nunder-sampling of the majority (negative) class will move the performance from\nthe lower left point to the upper right.\n\nrelated work proposed the SHRINK sy"
+  },
+  {
+    "paper_id": "Chawla_2002",
+    "chunk_id": 19,
+    "text": "stem that classi\ufb01es an overlapping region of minor-\nity (positive) and majority (negative) classes as positive; it searches for the \u201cbest positive\nregion\u201d (Kubat et al., 1998).\n\nJapkowicz (2000) discussed the e\ufb00ect of imbalance in a dataset. She evaluated three\nstrategies: under-sampling, resampling and a recognition-based induction scheme. We focus\non her sampling approaches. She experimented on arti\ufb01cial 1D data in order to easily\nmeasure and construct concept complexity. Two resampling method"
+  },
+  {
+    "paper_id": "Chawla_2002",
+    "chunk_id": 20,
+    "text": "s were considered.\nRandom resampling consisted of resampling the smaller class at random until it consisted\nof as many samples as the majority class and \u201cfocused resampling\u201d consisted of resampling\nonly those minority examples that occurred on the boundary between the minority and\nmajority classes. Random under-sampling was considered, which involved under-sampling\nthe majority class samples at random until their numbers matched the number of minority\nclass samples; focused under-sampling involv"
+  },
+  {
+    "paper_id": "Chawla_2002",
+    "chunk_id": 21,
+    "text": "ed under-sampling the majority class samples\nlying further away. She noted that both the sampling approaches were e\ufb00ective, and she also\nobserved that using the sophisticated sampling techniques did not give any clear advantage\nin the domain considered (Japkowicz, 2000).\n\nOne approach that is particularly relevant to our work is that of Ling and Li (1998).\nThey combined over-sampling of the minority class with under-sampling of the majority\nclass. They used lift analysis instead of accuracy to m"
+  },
+  {
+    "paper_id": "Chawla_2002",
+    "chunk_id": 22,
+    "text": "easure a classi\ufb01er\u2019s performance. They\nproposed that the test examples be ranked by a con\ufb01dence measure and then lift be used as\nthe evaluation criteria. A lift curve is similar to an ROC curve, but is more tailored for the\n\n324\n\n\fSMOTE\n\nmarketing analysis problem (Ling & Li, 1998). In one experiment, they under-sampled the\nmajority class and noted that the best lift index is obtained when the classes are equally\nIn another experiment, they over-sampled the positive\nrepresented (Ling & Li, 1998)"
+  },
+  {
+    "paper_id": "Chawla_2002",
+    "chunk_id": 23,
+    "text": ".\n(minority) examples with replacement to match the number of negative (majority) examples\nto the number of positive examples. The over-sampling and under-sampling combination\ndid not provide signi\ufb01cant improvement in the lift index. However, our approach to over-\nsampling di\ufb00ers from theirs.\n\nSolberg and Solberg (1996) considered the problem of imbalanced data sets in oil slick\nclassi\ufb01cation from SAR imagery. They used over-sampling and under-sampling techniques\nto improve the classi\ufb01cation of "
+  },
+  {
+    "paper_id": "Chawla_2002",
+    "chunk_id": 24,
+    "text": "oil slicks. Their training data had a distribution of 42 oil\nslicks and 2,471 look-alikes, giving a prior probability of 0.98 for look-alikes. This imbalance\nwould lead the learner (without any appropriate loss functions or a methodology to modify\npriors) to classify almost all look-alikes correctly at the expense of misclassifying many of\nthe oil slick samples (Solberg & Solberg, 1996). To overcome this imbalance problem, they\nover-sampled (with replacement) 100 samples from the oil slick, and "
+  },
+  {
+    "paper_id": "Chawla_2002",
+    "chunk_id": 25,
+    "text": "they randomly sampled\n100 samples from the non oil slick class to create a new dataset with equal probabilities.\nThey learned a classi\ufb01er tree on this balanced data set and achieved a 14% error rate on the\noil slicks in a leave-one-out method for error estimation; on the look alikes they achieved\nan error rate of 4% (Solberg & Solberg, 1996).\n\nAnother approach that is similar to our work is that of Domingos (1999). He compares\nthe \u201cmetacost\u201d approach to each of majority under-sampling and minori"
+  },
+  {
+    "paper_id": "Chawla_2002",
+    "chunk_id": 26,
+    "text": "ty over-sampling.\nHe \ufb01nds that metacost improves over either, and that under-sampling is preferable to mi-\nnority over-sampling. Error-based classi\ufb01ers are made cost-sensitive. The probability of\neach class for each example is estimated, and the examples are relabeled optimally with\nrespect to the misclassi\ufb01cation costs. The relabeling of the examples expands the decision\nspace as it creates new samples from which the classi\ufb01er may learn (Domingos, 1999).\n\nA feed-forward neural network trained o"
+  },
+  {
+    "paper_id": "Chawla_2002",
+    "chunk_id": 27,
+    "text": "n an imbalanced dataset may not learn to dis-\ncriminate enough between classes (DeRouin, Brown, Fausett, & Schneider, 1991). The\nauthors proposed that the learning rate of the neural network be adapted to the statistics\nof class representation in the data. They calculated an attention factor from the proportion\nof samples presented to the neural network for training. The learning rate of the network\nelements was adjusted based on the attention factor. They experimented on an arti\ufb01cially\ngenerate"
+  },
+  {
+    "paper_id": "Chawla_2002",
+    "chunk_id": 28,
+    "text": "d training set and on a real-world training set, both with multiple (more than two)\nclasses. They compared this to the approach of replicating the minority class samples to\nbalance the data set used for training. The classi\ufb01cation accuracy on the minority class was\nimproved.\n\nLewis and Catlett (1994) examined heterogeneous uncertainty sampling for supervised\nlearning. This method is useful for training samples with uncertain classes. The training\nsamples are labeled incrementally in two phases a"
+  },
+  {
+    "paper_id": "Chawla_2002",
+    "chunk_id": 29,
+    "text": "nd the uncertain instances are passed on\nto the next phase. They modi\ufb01ed C4.5 to include a loss ratio for determining the class\nvalues at the leaves. The class values were determined by comparison with a probability\nthreshold of LR/(LR + 1), where LR is the loss ratio (Lewis & Catlett, 1994).\n\nThe information retrieval (IR) domain (Dumais et al., 1998; Mladeni\u00b4c & Grobelnik,\n1999; Lewis & Ringuette, 1994; Cohen, 1995a) also faces the problem of class imbalance\nin the dataset. A document or web p"
+  },
+  {
+    "paper_id": "Chawla_2002",
+    "chunk_id": 30,
+    "text": "age is converted into a bag-of-words representation;\n\n325\n\n\fChawla, Bowyer, Hall & Kegelmeyer\n\nthat is, a feature vector re\ufb02ecting occurrences of words in the page is constructed. Usually,\nthere are very few instances of the interesting category in text categorization. This over-\nrepresentation of the negative class in information retrieval problems can cause problems\nin evaluating classi\ufb01ers\u2019 performances. Since error rate is not a good metric for skewed\ndatasets, the classi\ufb01cation performance "
+  },
+  {
+    "paper_id": "Chawla_2002",
+    "chunk_id": 31,
+    "text": "of algorithms in information retrieval is usually\nmeasured by precision and recall:\n\nrecall =\n\nT P\nT P + F N\n\nprecision =\n\nT P\nT P + F P\n\nMladeni\u00b4c and Grobelnik (1999) proposed a feature subset selection approach to deal\nwith imbalanced class distribution in the IR domain. They experimented with various\nfeature selection methods, and found that the odds ratio (van Rijsbergen, Harper, & Porter,\n1981) when combined with a Naive Bayes classi\ufb01er performs best in their domain. Odds\nratio is a probab"
+  },
+  {
+    "paper_id": "Chawla_2002",
+    "chunk_id": 32,
+    "text": "ilistic measure used to rank documents according to their relevance to the\npositive class (minority class). Information gain for a word, on the other hand, does not\npay attention to a particular target class; it is computed per word for each class. In an\nimbalanced text dataset (assuming 98 to 99% is the negative class), most of the features will\nbe associated with the negative class. Odds ratio incorporates the target class information in\nits metric giving better results when compared to inform"
+  },
+  {
+    "paper_id": "Chawla_2002",
+    "chunk_id": 33,
+    "text": "ation gain for text categorization.\nProvost and Fawcett (1997) introduced the ROC convex hull method to estimate the\nclassi\ufb01er performance for imbalanced datasets. They note that the problems of unequal\nclass distribution and unequal error costs are related and that little work has been done to\naddress either problem (Provost & Fawcett, 2001). In the ROC convex hull method, the\nROC space is used to separate classi\ufb01cation performance from the class and cost distribution\ninformation.\n\nTo summarize"
+  },
+  {
+    "paper_id": "Chawla_2002",
+    "chunk_id": 34,
+    "text": " the literature, under-sampling the majority class enables better classi\ufb01ers\nto be built than over-sampling the minority class. A combination of the two as done in\nprevious work does not lead to classi\ufb01ers that outperform those built utilizing only under-\nsampling. However, the over-sampling of the minority class has been done by sampling with\nreplacement from the original data. Our approach uses a di\ufb00erent method of over-sampling.\n\n4. SMOTE: Synthetic Minority Over-sampling TEchnique\n\n4.1 Minor"
+  },
+  {
+    "paper_id": "Chawla_2002",
+    "chunk_id": 35,
+    "text": "ity over-sampling with replacement\n\nPrevious research (Ling & Li, 1998; Japkowicz, 2000) has discussed over-sampling with\nreplacement and has noted that it doesn\u2019t signi\ufb01cantly improve minority class recognition.\nWe interpret the underlying e\ufb00ect in terms of decision regions in feature space. Essentially,\nas the minority class is over-sampled by increasing amounts, the e\ufb00ect is to identify similar\nbut more speci\ufb01c regions in the feature space as the decision region for the minority class.\nThis e"
+  },
+  {
+    "paper_id": "Chawla_2002",
+    "chunk_id": 36,
+    "text": "\ufb00ect for decision trees can be understood from the plots in Figure 3.\n\n326\n\n\fSMOTE\n\n2\u2212attributes, 10% data of the original Mammography dataset\n450\n\n2\u2212attributes, 10% data of the original Mammography dataset\n\n2\n\ne\nt\nu\nb\ni\nr\nt\nt\n\nA\n\n400\n\n350\n\n300\n\n250\n\n200\n\n150\n\n100\n\n50\n\n200\n\n150\n\n100\n\n50\n\n2\n\ne\nt\nu\nb\ni\nr\nt\nt\n\nA\n\n0\n\n0\n\n2\n\n4\n\n6\n\n8\nAttribute 1\n\n(a)\n\n10\n\n12\n\n14\n\n16\n\n0\n\n1\n\n2\n\n3\n\n6\n\n7\n\n8\n\n5\n\n4\nAttribute 1\n\n(b)\n\n2\u2212attributes, 10% data of the original Mammography dataset\n\n200\n\n150\n\n2\n\ne\nt\nu\nb\ni\nr\nt\nt\n\n100"
+  },
+  {
+    "paper_id": "Chawla_2002",
+    "chunk_id": 37,
+    "text": "\n\nA\n\n50\n\n0\n\n1\n\n2\n\n3\n\n4\n\n5\n\n6\n\n7\n\n8\n\nAttribute 1\n(c)\n\nFigure 3: a) Decision region in which the three minority class samples (shown by \u2019+\u2019) reside\nafter building a decision tree. This decision region is indicated by the solid-line\nrectangle. b) A zoomed-in view of the chosen minority class samples for the same\ndataset. Small solid-line rectangles show the decision regions as a result of over-\nsampling the minority class with replication. c) A zoomed-in view of the chosen\nminority class samples fo"
+  },
+  {
+    "paper_id": "Chawla_2002",
+    "chunk_id": 38,
+    "text": "r the same dataset. Dashed lines show the decision region\nafter over-sampling the minority class with synthetic generation.\n\n327\n\n \n \n \n\fChawla, Bowyer, Hall & Kegelmeyer\n\nThe data for the plot in Figure 3 was extracted from a Mammography dataset1 (Woods\net al., 1993). The minority class samples are shown by + and the majority class samples\nare shown by o in the plot. In Figure 3(a), the region indicated by the solid-line rectangle\nis a majority class decision region. Nevertheless, it contains t"
+  },
+  {
+    "paper_id": "Chawla_2002",
+    "chunk_id": 39,
+    "text": "hree minority class samples\nshown by \u2019+\u2019 as false negatives. If we replicate the minority class, the decision region for the\nminority class becomes very speci\ufb01c and will cause new splits in the decision tree. This will\nlead to more terminal nodes (leaves) as the learning algorithm tries to learn more and more\nspeci\ufb01c regions of the minority class; in essence, over\ufb01tting. Replication of the minority\nclass does not cause its decision boundary to spread into the majority class region. Thus,\nin Figu"
+  },
+  {
+    "paper_id": "Chawla_2002",
+    "chunk_id": 40,
+    "text": "re 3(b), the three samples previously in the majority class decision region now have\nvery speci\ufb01c decision regions.\n\n4.2 SMOTE\n\nWe propose an over-sampling approach in which the minority class is over-sampled by cre-\nating \u201csynthetic\u201d examples rather than by over-sampling with replacement. This approach\nis inspired by a technique that proved successful in handwritten character recognition (Ha\n& Bunke, 1997). They created extra training data by performing certain operations on\nreal data. In their"
+  },
+  {
+    "paper_id": "Chawla_2002",
+    "chunk_id": 41,
+    "text": " case, operations like rotation and skew were natural ways to perturb\nthe training data. We generate synthetic examples in a less application-speci\ufb01c manner, by\noperating in \u201cfeature space\u201d rather than \u201cdata space\u201d. The minority class is over-sampled\nby taking each minority class sample and introducing synthetic examples along the line\nsegments joining any/all of the k minority class nearest neighbors. Depending upon the\namount of over-sampling required, neighbors from the k nearest neighbors ar"
+  },
+  {
+    "paper_id": "Chawla_2002",
+    "chunk_id": 42,
+    "text": "e randomly\nchosen. Our implementation currently uses \ufb01ve nearest neighbors. For instance, if the\namount of over-sampling needed is 200%, only two neighbors from the \ufb01ve nearest neigh-\nbors are chosen and one sample is generated in the direction of each. Synthetic samples\nare generated in the following way: Take the di\ufb00erence between the feature vector (sample)\nunder consideration and its nearest neighbor. Multiply this di\ufb00erence by a random number\nbetween 0 and 1, and add it to the feature vecto"
+  },
+  {
+    "paper_id": "Chawla_2002",
+    "chunk_id": 43,
+    "text": "r under consideration. This causes the\nselection of a random point along the line segment between two speci\ufb01c features. This\napproach e\ufb00ectively forces the decision region of the minority class to become more general.\nAlgorithm SMOTE , on the next page, is the pseudo-code for SMOTE. Table 4.2 shows\nan example of calculation of random synthetic samples. The amount of over-sampling\nis a parameter of the system, and a series of ROC curves can be generated for di\ufb00erent\npopulations and ROC analysis p"
+  },
+  {
+    "paper_id": "Chawla_2002",
+    "chunk_id": 44,
+    "text": "erformed.\n\nThe synthetic examples cause the classi\ufb01er to create larger and less speci\ufb01c decision\nregions as shown by the dashed lines in Figure 3(c), rather than smaller and more speci\ufb01c\nregions. More general regions are now learned for the minority class samples rather than\nthose being subsumed by the majority class samples around them. The e\ufb00ect is that de-\ncision trees generalize better. Figures 4 and 5 compare the minority over-sampling with\nreplacement and SMOTE. The experiments were conduc"
+  },
+  {
+    "paper_id": "Chawla_2002",
+    "chunk_id": 45,
+    "text": "ted on the mammography dataset.\nThere were 10923 examples in the majority class and 260 examples in the minority class\noriginally. We have approximately 9831 examples in the majority class and 233 examples\n\n1. The data is available from the USF Intelligent Systems Lab, http://morden.csee.usf.edu/\u02dcchawla.\n\n328\n\n\fSMOTE\n\nin the minority class for the training set used in 10-fold cross-validation. The minority class\nwas over-sampled at 100%, 200%, 300%, 400% and 500% of its original size. The graphs"
+  },
+  {
+    "paper_id": "Chawla_2002",
+    "chunk_id": 46,
+    "text": "\nshow that the tree sizes for minority over-sampling with replacement at higher degrees of\nreplication are much greater than those for SMOTE, and the minority class recognition of\nthe minority over-sampling with replacement technique at higher degrees of replication isn\u2019t\nas good as SMOTE.\n\nAlgorithm SMOTE (T, N, k)\nInput: Number of minority class samples T ; Amount of SMOTE N %; Number of nearest\n\nneighbors k\n\nOutput: (N/100) * T synthetic minority class samples\n1.\n\nthen Randomize the T minorit"
+  },
+  {
+    "paper_id": "Chawla_2002",
+    "chunk_id": 47,
+    "text": "y class samples\n\n(\u2217 If N is less than 100%, randomize the minority class samples as only a random\npercent of them will be SMOTEd. \u2217)\nif N < 100\n\n2.\n3.\n4.\n5.\n6.\n7. N = (int)(N/100) (\u2217 The amount of SMOTE is assumed to be in integral multiples of\n\nT = (N/100) \u2217 T\nN = 100\n\nendif\n\n100. \u2217)\nk = Number of nearest neighbors\nnumattrs = Number of attributes\n\n8.\n9.\n10. Sample[ ][ ]: array for original minority class samples\n11. newindex: keeps a count of number of synthetic samples generated, initialized t"
+  },
+  {
+    "paper_id": "Chawla_2002",
+    "chunk_id": 48,
+    "text": "o 0\n12. Synthetic[ ][ ]: array for synthetic samples\n\n(\u2217 Compute k nearest neighbors for each minority class sample only. \u2217)\nfor i \u2190 1 to T\n\nCompute k nearest neighbors for i, and save the indices in the nnarray\nPopulate(N , i, nnarray)\n\n13.\n14.\n15.\n16. endfor\n\nPopulate(N, i, nnarray) (\u2217 Function to generate the synthetic samples. \u2217)\n\nChoose a random number between 1 and k, call it nn. This step chooses one of\nthe k nearest neighbors of i.\nfor attr \u2190 1 to numattrs\n\nCompute: dif = Sample[nnarray["
+  },
+  {
+    "paper_id": "Chawla_2002",
+    "chunk_id": 49,
+    "text": "nn]][attr] \u2212 Sample[i][attr]\nCompute: gap = random number between 0 and 1\nSynthetic[newindex][attr] = Sample[i][attr] + gap \u2217 dif\n\n17. while N 6= 0\n18.\n\n19.\n20.\n21.\n22.\n23.\n24.\n25.\n26. endwhile\n27. return (\u2217 End of Populate. \u2217)\n\nendfor\nnewindex++\nN = N \u2212 1\n\nEnd of Pseudo-Code.\n\n329\n\n\fChawla, Bowyer, Hall & Kegelmeyer\n\nConsider a sample (6,4) and let (4,3) be its nearest neighbor.\n(6,4) is the sample for which k-nearest neighbors are being identi\ufb01ed.\n(4,3) is one of its k-nearest neighbors.\nLet:\n"
+  },
+  {
+    "paper_id": "Chawla_2002",
+    "chunk_id": 50,
+    "text": "f1 1 = 6 f2 1 = 4 f2 1 - f1 1 = -2\nf1 2 = 4 f2 2 = 3 f2 2 - f1 2 = -1\nThe new samples will be generated as\n(f1\u2019,f2\u2019) = (6,4) + rand(0-1) * (-2,-1)\nrand(0-1) generates a random number between 0 and 1.\n\nTable 1: Example of generation of synthetic examples (SMOTE).\n\nPruned decision tree size vs the degree of minority over\u2212sampling\n\n260\n\n240\n\n220\n\n200\n\n180\n\n160\n\n140\n\n120\n\n100\n\n)\ns\ne\nd\no\nn\n\nf\no\n\nr\ne\nb\nm\nu\nN\n\n(\ne\nz\ns\n\ni\n\ne\ne\nr\nt\n\nn\no\n\ni\ni\n\ni\n\ns\nc\ne\nD\n\n80\n\n60\n\n0\n\n50\n\n100\n\n150\n\nSynthetic data \nReplicate"
+  },
+  {
+    "paper_id": "Chawla_2002",
+    "chunk_id": 51,
+    "text": "d data\n\n350\n\n400\n\n450\n\n500\n\n200\n\n250\nDegree of minority over\u2212sampling\n\n300\n\nFigure 4: Comparison of decision tree sizes for replicated over-sampling and SMOTE for\n\nthe Mammography dataset\n\n330\n\n \n \n \n \n \n\fSMOTE\n\n% Minority Correct vs the Degree of Minority Over\u2212sampling\n\nSynthetic data \nReplicated data\n\n50\n\n100\n\n150\n\n200\n\n250\n\n300\n\n350\n\n400\n\n450\n\n500\n\nDegree of Minority Over\u2212sampling\n\nt\nc\ne\nr\nr\no\nC\ny\nt\ni\nr\no\nn\ni\nM\n%\n\n75\n\n70\n\n65\n\n60\n\n55\n\n50\n\n0\n\nFigure 5: Comparison of % Minority correct for repli"
+  },
+  {
+    "paper_id": "Chawla_2002",
+    "chunk_id": 52,
+    "text": "cated over-sampling and SMOTE for\n\nthe Mammography dataset\n\n4.3 Under-sampling and SMOTE Combination\n\nThe majority class is under-sampled by randomly removing samples from the majority class\npopulation until the minority class becomes some speci\ufb01ed percentage of the majority class.\nThis forces the learner to experience varying degrees of under-sampling and at higher degrees\nof under-sampling the minority class has a larger presence in the training set. In describing\nour experiments, our terminol"
+  },
+  {
+    "paper_id": "Chawla_2002",
+    "chunk_id": 53,
+    "text": "ogy will be such that if we under-sample the majority class at\n200%, it would mean that the modi\ufb01ed dataset will contain twice as many elements from the\nminority class as from the majority class; that is, if the minority class had 50 samples and\nthe majority class had 200 samples and we under-sample majority at 200%, the majority\nclass would end up having 25 samples. By applying a combination of under-sampling and\nover-sampling, the initial bias of the learner towards the negative (majority) cla"
+  },
+  {
+    "paper_id": "Chawla_2002",
+    "chunk_id": 54,
+    "text": "ss is reversed\nin the favor of the positive (minority) class. Classi\ufb01ers are learned on the dataset perturbed\nby \u201cSMOTING\u201d the minority class and under-sampling the majority class.\n\n5. Experiments\n\nWe used three di\ufb00erent machine learning algorithms for our experiments. Figure 6 provides\nan overview of our experiments.\n\n1. C4.5: We compared various combinations of SMOTE and under-sampling with plain\n\nunder-sampling using C4.5 release 8 (Quinlan, 1992) as the base classi\ufb01er.\n\n331\n\n \n\fChawla, Bowye"
+  },
+  {
+    "paper_id": "Chawla_2002",
+    "chunk_id": 55,
+    "text": "r, Hall & Kegelmeyer\n\nSMOTE \nand Undersampling.\n\nLoss-Ratio\nvaried from 0.9 to 0.001.\n\n Modify costs of majority and minority \nclasses by changing priors.\n\nC4.5\n\nRipper\n\nNaive Bayes\n\nROC\u2019s generated for SMOTE, Undersampling\nand Loss Ratio comparisons. Performance \nevaluated with AUC and ROC convex hull.\n\nROC\u2019s generated for comparison between \nSMOTE and Under-sampling using C4.5, and\nSMOTE using C4.5 and Naive bayes. \nPerformance evaluated with AUC and ROC convex hull.\n\nFigure 6: Experiments Ove"
+  },
+  {
+    "paper_id": "Chawla_2002",
+    "chunk_id": 56,
+    "text": "rview\n\n2. Ripper: We compared various combinations of SMOTE and under-sampling with\nplain under-sampling using Ripper (Cohen, 1995b) as the base classi\ufb01er. We also\nvaried Ripper\u2019s loss ratio (Cohen & Singer, 1996; Lewis & Catlett, 1994) from 0.9 to\n0.001 (as a means of varying misclassi\ufb01cation cost) and compared the e\ufb00ect of this\nvariation with the combination of SMOTE and under-sampling. By reducing the loss\nratio from 0.9 to 0.001 we were able to build a set of rules for the minority class.\n\n3"
+  },
+  {
+    "paper_id": "Chawla_2002",
+    "chunk_id": 57,
+    "text": ". Naive Bayes Classi\ufb01er: The Naive Bayes Classi\ufb01er2 can be made cost-sensitive\nby varying the priors of the minority class. We varied the priors of the minority\nclass from 1 to 50 times the majority class and compared with C4.5\u2019s SMOTE and\nunder-sampling combination.\n\nThese di\ufb00erent learning algorithms allowed SMOTE to be compared to some methods\nthat can handle misclassi\ufb01cation costs directly. %FP and %TP were averaged over 10-fold\ncross-validation runs for each of the data combinations. The mi"
+  },
+  {
+    "paper_id": "Chawla_2002",
+    "chunk_id": 58,
+    "text": "nority class examples were\nover-sampled by calculating the \ufb01ve nearest neighbors and generating synthetic examples.\nThe AUC was calculated using the trapezoidal rule. We extrapolated an extra point of TP\n= 100% and FP = 100% for each ROC curve. We also computed the ROC convex hull\nto identify the optimal classi\ufb01ers, as the points lying on the hull are potentially optimal\nclassi\ufb01ers (Provost & Fawcett, 2001).\n\n2. The source code was downloaded from http://fuzzy.cs.uni-magdeburg.de/\u02dcborgelt/softwa"
+  },
+  {
+    "paper_id": "Chawla_2002",
+    "chunk_id": 59,
+    "text": "re.html.\n\n332\n\n\fSMOTE\n\n5.1 Datasets\n\nWe experimented on nine di\ufb00erent datasets. These datasets are summarized in Table 5.2.\nThese datasets vary extensively in their size and class proportions, thus o\ufb00ering di\ufb00erent\ndomains for SMOTE. In order of increasing imbalance they are:\n\n1. The Pima Indian Diabetes (Blake & Merz, 1998) has 2 classes and 768 samples. The\ndata is used to identify the positive diabetes cases in a population near Phoenix,\nArizona. The number of positive class samples is only 2"
+  },
+  {
+    "paper_id": "Chawla_2002",
+    "chunk_id": 60,
+    "text": "68. Good sensitivity to\ndetection of diabetes cases will be a desirable attribute of the classi\ufb01er.\n\n2. The Phoneme dataset is from the ELENA project3. The aim of the dataset is to\ndistinguish between nasal (class 0) and oral sounds (class 1). There are 5 features.\nThe class distribution is 3,818 samples in class 0 and 1,586 samples in class 1.\n\n3. The Adult dataset (Blake & Merz, 1998) has 48,842 samples with 11,687 samples\nbelonging to the minority class. This dataset has 6 continuous features"
+  },
+  {
+    "paper_id": "Chawla_2002",
+    "chunk_id": 61,
+    "text": " and 8 nominal\nfeatures. SMOTE and SMOTE-NC (see Section 6.1) algorithms were evaluated on\nthis dataset. For SMOTE, we extracted the continuous features and generated a new\ndataset with only continuous features.\n\n4. The E-state data4 (Hall, Mohney, & Kier, 1991) consists of electrotopological state\ndescriptors for a series of compounds from the National Cancer Institute\u2019s Yeast Anti-\nCancer drug screen. E-state descriptors from the NCI Yeast AntiCancer Drug Screen\nwere generated by Tripos, Inc. "
+  },
+  {
+    "paper_id": "Chawla_2002",
+    "chunk_id": 62,
+    "text": "Brie\ufb02y, a series of about 60,000 compounds were\ntested against a series of 6 yeast strains at a given concentration. The test was a\nhigh-throughput screen at only one concentration so the results are subject to con-\ntamination, etc. The growth inhibition of the yeast strain when exposed to the given\ncompound (with respect to growth of the yeast in a neutral solvent) was measured.\nThe activity classes are either active \u2014 at least one single yeast strain was inhibited\nmore than 70%, or inactive \u2014 "
+  },
+  {
+    "paper_id": "Chawla_2002",
+    "chunk_id": 63,
+    "text": "no yeast strain was inhibited more than 70%. The\ndataset has 53,220 samples with 6,351 samples of active compounds.\n\n5. The Satimage dataset (Blake & Merz, 1998) has 6 classes originally. We chose the\nsmallest class as the minority class and collapsed the rest of the classes into one as\nwas done in (Provost et al., 1998). This gave us a skewed 2-class dataset, with 5809\nmajority class samples and 626 minority class samples.\n\n6. The Forest Cover dataset is from the UCI repository (Blake & Merz, 1"
+  },
+  {
+    "paper_id": "Chawla_2002",
+    "chunk_id": 64,
+    "text": "998). This\ndataset has 7 classes and 581,012 samples. This dataset is for the prediction of forest\ncover type based on cartographic variables. Since our system currently works for bi-\nnary classes we extracted data for two classes from this dataset and ignored the rest.\nMost other approaches only work for only two classes (Ling & Li, 1998; Japkowicz,\n2000; Kubat & Matwin, 1997; Provost & Fawcett, 2001). The two classes we con-\nsidered are Ponderosa Pine with 35,754 samples and Cottonwood/Willow "
+  },
+  {
+    "paper_id": "Chawla_2002",
+    "chunk_id": 65,
+    "text": "with 2,747\n\n3. ftp.dice.ucl.ac.be in the directory pub/neural-nets/ELENA/databases.\n4. We would like to thank Steven Eschrich for providing the dataset and description to us.\n\n333\n\n\fChawla, Bowyer, Hall & Kegelmeyer\n\nDataset\nPima\nPhoneme\nAdult\nE-state\nSatimage\nForest Cover\nOil\nMammography\nCan\n\nMajority Class Minority Class\n500\n3818\n37155\n46869\n5809\n35754\n896\n10923\n435512\n\n268\n1586\n11687\n6351\n626\n2747\n41\n260\n8360\n\nTable 2: Dataset distribution\n\nsamples. Nevertheless, the SMOTE technique can be ap"
+  },
+  {
+    "paper_id": "Chawla_2002",
+    "chunk_id": 66,
+    "text": "plied to a multiple class prob-\nlem as well by specifying what class to SMOTE for. However, in this paper, we have\nfocused on 2-classes problems, to explicitly represent positive and negative classes.\n\n7. The Oil dataset was provided by Robert Holte and is used in their paper (Kubat et al.,\n\n1998). This dataset has 41 oil slick samples and 896 non-oil slick samples.\n\n8. The Mammography dataset (Woods et al., 1993) has 11,183 samples with 260 calci-\n\ufb01cations. If we look at predictive accuracy as "
+  },
+  {
+    "paper_id": "Chawla_2002",
+    "chunk_id": 67,
+    "text": "a measure of goodness of the classi\ufb01er\nfor this case, the default accuracy would be 97.68% when every sample is labeled non-\ncalci\ufb01cation. But, it is desirable for the classi\ufb01er to predict most of the calci\ufb01cations\ncorrectly.\n\n9. The Can dataset was generated from the Can ExodusII data using the AVATAR\n(Chawla & Hall, 1999) version of the Mustafa Visualization tool5. The portion of\nthe can being crushed was marked as \u201cvery interesting\u201d and the rest of the can was\nmarked as \u201cunknown.\u201d A dataset o"
+  },
+  {
+    "paper_id": "Chawla_2002",
+    "chunk_id": 68,
+    "text": "f size 443,872 samples with 8,360 samples marked\nas \u201cvery interesting\u201d was generated.\n\n5.2 ROC Creation\n\nA ROC curve for SMOTE is produced by using C4.5 or Ripper to create a classi\ufb01er for\neach one of a series of modi\ufb01ed training datasets. A given ROC curve is produced by \ufb01rst\nover-sampling the minority class to a speci\ufb01ed degree and then under-sampling the majority\nclass at increasing degrees to generate the successive points on the curve. The amount of\nunder-sampling is identical to plain unde"
+  },
+  {
+    "paper_id": "Chawla_2002",
+    "chunk_id": 69,
+    "text": "r-sampling. So, each corresponding point on each\nROC curve for a dataset represents the same number of majority class samples. Di\ufb00erent\nROC curves are produced by starting with di\ufb00erent levels of minority over-sampling. ROC\ncurves were also generated by varying the loss ratio in Ripper from 0.9 to 0.001 and by\nvarying the priors of the minority class from the original distribution to up to 50 times the\nmajority class for a Naive Bayes Classi\ufb01er.\n\n5. The Mustafa visualization tool was developed b"
+  },
+  {
+    "paper_id": "Chawla_2002",
+    "chunk_id": 70,
+    "text": "y Mike Glass of Sandia National Labs.\n\n334\n\n\fSMOTE\n\nPhoneme ROC\n\nUnder\u2212C4.5              \n200 SMOTE\u2212C4.5\nNaive Bayes        \nHull               \n\n100\n\n95\n\n90\n\n85\n\n80\n\n75\n\n70\n\nP\nT\n%\n\n65\n\n10\n\n20\n\n30\n\n40\n\n50\n\n60\n\n70\n\n80\n\n90\n\n100\n\n%FP\n\nFigure 7: Phoneme. Comparison of SMOTE-C4.5, Under-C4.5, and Naive Bayes. SMOTE-\nC4.5 dominates over Naive Bayes and Under-C4.5 in the ROC space. SMOTE-\nC4.5 classi\ufb01ers are potentially optimal classi\ufb01ers.\n\nFigures 9 through 23 show the experimental ROC curves obtained"
+  },
+  {
+    "paper_id": "Chawla_2002",
+    "chunk_id": 71,
+    "text": " for the nine datasets\nwith the three classi\ufb01ers. The ROC curve for plain under-sampling of the majority class\n(Ling & Li, 1998; Japkowicz, 2000; Kubat & Matwin, 1997; Provost & Fawcett, 2001) is\ncompared with our approach of combining synthetic minority class over-sampling (SMOTE)\nwith majority class under-sampling. The plain under-sampling curve is labeled \u201cUnder\u201d,\nand the SMOTE and under-sampling combination ROC curve is labeled \u201cSMOTE\u201d. De-\npending on the size and relative imbalance of the d"
+  },
+  {
+    "paper_id": "Chawla_2002",
+    "chunk_id": 72,
+    "text": "ataset, one to \ufb01ve SMOTE and under-\nsampling curves are created. We only show the best results from SMOTE combined with\nunder-sampling and the plain under-sampling curve in the graphs. The SMOTE ROC curve\nfrom C4.5 is also compared with the ROC curve obtained from varying the priors of minority\nclass using a Naive Bayes classi\ufb01er \u2014 labeled as \u201cNaive Bayes\u201d. \u201cSMOTE\u201d, \u201cUnder\u201d, and\n\u201cLoss Ratio\u201d ROC curves, generated using Ripper are also compared. For a given family\nof ROC curves, an ROC convex hul"
+  },
+  {
+    "paper_id": "Chawla_2002",
+    "chunk_id": 73,
+    "text": "l (Provost & Fawcett, 2001) is generated. The ROC\nconvex hull is generated using the Graham\u2019s algorithm (O\u2019Rourke, 1998). For reference, we\nshow the ROC curve that would be obtained using minority over-sampling by replication\nin Figure 19.\n\nEach point on the ROC curve is the result of either a classi\ufb01er (C4.5 or Ripper) learned\nfor a particular combination of under-sampling and SMOTE, a classi\ufb01er (C4.5 or Ripper)\nlearned with plain under-sampling, or a classi\ufb01er (Ripper) learned using some loss "
+  },
+  {
+    "paper_id": "Chawla_2002",
+    "chunk_id": 74,
+    "text": "ratio or\na classi\ufb01er (Naive Bayes) learned for a di\ufb00erent prior for the minority class. Each point\nrepresents the average (%TP and %FP) 10-fold cross-validation result. The lower leftmost\npoint for a given ROC curve is from the raw dataset, without any majority class under-\n\n335\n\n\fChawla, Bowyer, Hall & Kegelmeyer\n\nPhoneme ROC with Ripper\n\nUnder\u2212Ripper     \n200 SMOTE\u2212Ripper \nLoss Ratio   \nHull           \n\n10\n\n20\n\n30\n\n40\n\n50\n%FP\n\n60\n\n70\n\n80\n\n90\n\n100\n\n100\n\n95\n\n90\n\nP\nT\n%\n\n85\n\n80\n\n75\n\n70\n\n0\n\nFigure "
+  },
+  {
+    "paper_id": "Chawla_2002",
+    "chunk_id": 75,
+    "text": "8: Phoneme. Comparison of SMOTE-Ripper, Under-Ripper, and modifying Loss\nRatio in Ripper. SMOTE-Ripper dominates over Under-Ripper and Loss Ratio\nin the ROC space. More SMOTE-Ripper classi\ufb01ers lie on the ROC convex hull.\n\nP\nT\n%\n\n100\n\n95\n\n90\n\n85\n\n80\n\n75\n\n70\n\n65\n\n60\n\n55\n\n50\n\n10\n\nPima ROC\n\nUnder\u2212C4.5     \n100 SMOTE\u2212C4.5 \nNaive Bayes    \nHull           \n\n20\n\n30\n\n40\n\n50\n\n60\n\n70\n\n80\n\n90\n\n100\n\n%FP\n\nFigure 9: Pima Indians Diabetes. Comparison of SMOTE-C4.5, Under-C4.5, and Naive\nBayes. Naive Bayes domin"
+  },
+  {
+    "paper_id": "Chawla_2002",
+    "chunk_id": 76,
+    "text": "ates over SMOTE-C4.5 in the ROC space.\n\n336\n\n\fSMOTE\n\nPima ROC with Ripper\n\nUnder\u2212Ripper    \n100 SMOTE\u2212Ripper\nLoss Ratio            \nHull                 \n\n20\n\n30\n\n40\n\n50\n\n60\n\n70\n\n80\n\n90\n\n100\n\n%FP\n\nP\nT\n%\n\n100\n\n95\n\n90\n\n85\n\n80\n\n75\n\n70\n\n65\n\n60\n\n55\n\n10\n\nFigure 10: Pima Indians Diabetes. Comparison of SMOTE-Ripper, Under-Ripper, and\nmodifying Loss Ratio in Ripper. SMOTE-Ripper dominates over Under-Ripper\nand Loss Ratio in the ROC space.\n\nsampling or minority class over-sampling. The minority class was"
+  },
+  {
+    "paper_id": "Chawla_2002",
+    "chunk_id": 77,
+    "text": " over-sampled at 50%,\n100%, 200%, 300%, 400%, 500%. The majority class was under-sampled at 10%, 15%,\n25%, 50%, 75%, 100%, 125%, 150%, 175%, 200%, 300%, 400%, 500%, 600%, 700%, 800%,\n1000%, and 2000%. The amount of majority class under-sampling and minority class over-\nsampling depended on the dataset size and class proportions. For instance, consider the\nROC curves in Figure 17 for the mammography dataset. There are three curves \u2014 one for\nplain majority class under-sampling in which the range o"
+  },
+  {
+    "paper_id": "Chawla_2002",
+    "chunk_id": 78,
+    "text": "f under-sampling is varied between\n5% and 2000% at di\ufb00erent intervals, one for a combination of SMOTE and majority class\nunder-sampling, and one for Naive Bayes \u2014 and one ROC convex hull curve. The ROC\ncurve shown in Figure 17 is for the minority class over-sampled at 400%. Each point on\nthe SMOTE ROC curves represents a combination of (synthetic) over-sampling and under-\nsampling, the amount of under-sampling follows the same range as for plain under-sampling.\nFor a better understanding of the "
+  },
+  {
+    "paper_id": "Chawla_2002",
+    "chunk_id": 79,
+    "text": "ROC graphs, we have shown di\ufb00erent sets of ROC curves\nfor one of our datasets in Appendix A.\n\nFor the Can dataset, we had to SMOTE to a lesser degree than for the other datasets\ndue to the structural nature of the dataset. For the Can dataset there is a structural\nneighborhood already established in the mesh geometry, so SMOTE can lead to creating\nneighbors which are under the surface (and hence not interesting), since we are looking at\nthe feature space of physics variables and not the structur"
+  },
+  {
+    "paper_id": "Chawla_2002",
+    "chunk_id": 80,
+    "text": "al information.\n\nThe ROC curves show a trend that as we increase the amount of under-sampling coupled\nwith over-sampling, our minority classi\ufb01cation accuracy increases, of course at the expense\nof more majority class errors. For almost all the ROC curves, the SMOTE approach dom-\n\n337\n\n\fChawla, Bowyer, Hall & Kegelmeyer\n\nSatimage ROC\n\nUnder\u2212C4.5    \n200 SMOTE\u2212C4.5\nNaive Bayes   \nHull          \n\n100\n\n95\n\n90\n\n85\n\n80\n\n75\n\n70\n\n65\n\n60\n\n55\n\nP\nT\n%\n\n50\n\n0\n\n10\n\n20\n\n30\n\n40\n\n50\n%FP\n\n60\n\n70\n\n80\n\n90\n\n100\n\nFig"
+  },
+  {
+    "paper_id": "Chawla_2002",
+    "chunk_id": 81,
+    "text": "ure 11: Satimage. Comparison of SMOTE-C4.5, Under-C4.5, and Naive Bayes. The\nROC curves of Naive Bayes and SMOTE-C4.5 show an overlap; however, at\nhigher TP\u2019s more points from SMOTE-C4.5 lie on the ROC convex hull.\n\nSatimage ROC with Ripper\n\nUnder\u2212Ripper          \n300 SMOTE\u2212Ripper\nLoss Ratio     \nHull           \n\n100\n\n95\n\n90\n\n85\n\n80\n\n75\n\n70\n\n65\n\n60\n\n55\n\nP\nT\n%\n\n50\n\n0\n\n10\n\n20\n\n30\n\n40\n\n50\n%FP\n\n60\n\n70\n\n80\n\n90\n\n100\n\nFigure 12: Satimage. Comparison of SMOTE-Ripper, Under-Ripper, and modifying Loss\nRat"
+  },
+  {
+    "paper_id": "Chawla_2002",
+    "chunk_id": 82,
+    "text": "io in Ripper. SMOTE-Ripper dominates the ROC space. The ROC convex\nhull is mostly constructed with points from SMOTE-Ripper.\n\n338\n\n\fSMOTE\n\nCovtype ROC\n\nUnder\u2212C4.5     \n300 SMOTE\u2212C4.5 \nNaive Bayes    \nHull           \n\n100\n\n90\n\n80\n\n70\n\n60\n\n50\n\n40\n\n30\n\n20\n\nP\nT\n%\n\n10\n\n0\n\n10\n\n20\n\n30\n\n40\n\n50\n%FP\n\n60\n\n70\n\n80\n\n90\n\n100\n\nFigure 13: Forest Cover. Comparison of SMOTE-C4.5, Under-C4.5, and Naive Bayes.\nSMOTE-C4.5 and Under-C4.5 ROC curves are very close to each other. How-\never, more points from the SMOTE-C4"
+  },
+  {
+    "paper_id": "Chawla_2002",
+    "chunk_id": 83,
+    "text": ".5 ROC curve lie on the ROC convex\nhull, thus establishing a dominance.\n\ninates. Adhering to the de\ufb01nition of ROC convex hull, most of the potentially optimal\nclassi\ufb01ers are the ones generated with SMOTE.\n\n5.3 AUC Calculation\n\nThe Area Under the ROC curve (AUC) is calculated using a form of the trapezoid rule. The\nlower leftmost point for a given ROC curve is a classi\ufb01er\u2019s performance on the raw data.\nThe upper rightmost point is always (100%, 100%). If the curve does not naturally end at\nthis p"
+  },
+  {
+    "paper_id": "Chawla_2002",
+    "chunk_id": 84,
+    "text": "oint, the point is added. This is necessary in order for the AUC\u2019s to be compared\nover the same range of %FP.\n\nThe AUCs listed in Table 5.3 show that for all datasets the combined synthetic mi-\nnority over-sampling and majority over-sampling is able to improve over plain majority\nunder-sampling with C4.5 as the base classi\ufb01er. Thus, our SMOTE approach provides\nan improvement in correct classi\ufb01cation of data in the underrepresented class. The same\nconclusion holds from an examination of the ROC c"
+  },
+  {
+    "paper_id": "Chawla_2002",
+    "chunk_id": 85,
+    "text": "onvex hulls. Some of the entries are\nmissing in the table, as SMOTE was not applied at the same amounts to all datasets. The\namount of SMOTE was less for less skewed datasets. Also, we have not included AUC\u2019s\nfor Ripper/Naive Bayes. The ROC convex hull identi\ufb01es SMOTE classi\ufb01ers to be poten-\ntially optimal as compared to plain under-sampling or other treatments of misclassi\ufb01cation\ncosts, generally. Exceptions are as follows: for the Pima dataset, Naive Bayes dominates\nover SMOTE-C4.5; for the Oi"
+  },
+  {
+    "paper_id": "Chawla_2002",
+    "chunk_id": 86,
+    "text": "l dataset, Under-Ripper dominates over SMOTE-Ripper. For\nthe Can dataset, SMOTE-classi\ufb01er (classi\ufb01er = C4.5 or Ripper) and Under-classi\ufb01er ROC\n\n339\n\n\fChawla, Bowyer, Hall & Kegelmeyer\n\nCovtype ROC with RIPPER\n\nUnder\u2212Ripper    \n100 SMOTE\u2212Ripper \nLoss Ratio    \nHull           \n\n100\n\n98\n\n96\n\n94\n\n92\n\n90\n\n88\n\nP\nT\n%\n\n86\n\n0\n\n10\n\n20\n\n30\n\n40\n\n50\n%FP\n\n60\n\n70\n\n80\n\n90\n\n100\n\nFigure 14: Forest Cover. Comparison of SMOTE-Ripper, Under-Ripper, and modifying\nLoss Ratio in Ripper. SMOTE-Ripper shows a domination "
+  },
+  {
+    "paper_id": "Chawla_2002",
+    "chunk_id": 87,
+    "text": "in the ROC space.\nMore points from SMOTE-Ripper curve lie on the ROC convex hull.\n\n100\n\n90\n\n80\n\n70\n\n60\n\n50\n\n40\n\n30\n\n20\n\n10\n\nP\nT\n%\n\nOil ROC\n\nUnder\u2212C4.5    \n500 SMOTE\u2212C4.5\nNaive Bayes   \nHull          \n\n0\n\n0\n\n10\n\n20\n\n30\n\n40\n\n50\n%FP\n\n60\n\n70\n\n80\n\n90\n\n100\n\nFigure 15: Oil. Comparison of SMOTE-C4.5, Under-C4.5, and Naive Bayes. Although,\nSMOTE-C4.5 and Under-C4.5 ROC curves intersect at points, more points from\nSMOTE-C4.5 curve lie on the ROC convex hull.\n\n340\n\n\fSMOTE\n\nOil ROC with Ripper\n\nUnder\u2212Ripper"
+  },
+  {
+    "paper_id": "Chawla_2002",
+    "chunk_id": 88,
+    "text": "     \n300 SMOTE\u2212Ripper \nLoss Ratio    \nHull           \n\n100\n\n90\n\n80\n\n70\n\n60\n\n50\n\n40\n\nP\nT\n%\n\n30\n\n0\n\n10\n\n20\n\n30\n\n40\n\n50\n%FP\n\n60\n\n70\n\n80\n\n90\n\n100\n\nFigure 16: Oil. Comparison of SMOTE-Ripper, Under-Ripper, and modifying Loss Ratio\nin Ripper. Under-Ripper and SMOTE-Ripper curves intersect, and more points\nfrom the Under-Ripper curve lie on the ROC convex hull.\n\nMammography ROC\n\nUnder\u2212C4.5    \n400 SMOTE\u2212C4.5\nNaive Bayes   \nHull          \n\n100\n\n90\n\n80\n\n70\n\n60\n\n50\n\n40\n\n30\n\n20\n\n10\n\nP\nT\n%\n\n0\n\n0\n\n10\n\n20\n\n3"
+  },
+  {
+    "paper_id": "Chawla_2002",
+    "chunk_id": 89,
+    "text": "0\n\n40\n\n50\n%FP\n\n60\n\n70\n\n80\n\n90\n\n100\n\nFigure 17: Mammography. Comparison of SMOTE-C4.5, Under-C4.5, and Naive Bayes.\nSMOTE-C4.5 and Under-C4.5 curves intersect in the ROC space; however, by\nvirtue of number of points on the ROC convex hull, SMOTE-C4.5 has more\npotentially optimal classi\ufb01ers.\n\n341\n\n\fChawla, Bowyer, Hall & Kegelmeyer\n\nMammography ROC with RIPPER\n\nUnder\u2212Ripper     \n400 SMOTE\u2212Ripper \nLoss Ratio   \nHull           \n\n100\n\n95\n\n90\n\n85\n\n80\n\n75\n\n70\n\n65\n\n60\n\nP\nT\n%\n\n55\n\n0\n\n10\n\n20\n\n30\n\n40\n\n50\n%"
+  },
+  {
+    "paper_id": "Chawla_2002",
+    "chunk_id": 90,
+    "text": "FP\n\n60\n\n70\n\n80\n\n90\n\n100\n\nFigure 18: Mammography. Comparison of SMOTE-Ripper, Under-Ripper, and modifying\nLoss Ratio in Ripper. SMOTE-Ripper dominates the ROC space for TP > 75%.\n\nMammography ROC with C4.5\n\n100\n\n95\n\n90\n\n85\n\n80\n\n75\n\n70\n\n65\n\n60\n\n55\n\nP\nT\n%\n\n400 SMOTE    \n400 Replicate\nHull         \n\n50\n\n0\n\n10\n\n20\n\n30\n\n40\n\n50\n%FP\n\n60\n\n70\n\n80\n\n90\n\n100\n\nFigure 19: A comparison of over-sampling minority class examples by SMOTE and over-\nsampling the minority class examples by replication for the Mammogr"
+  },
+  {
+    "paper_id": "Chawla_2002",
+    "chunk_id": 91,
+    "text": "aphy\ndataset.\n\n342\n\n\fSMOTE\n\nE\u2212state ROC\n\nUnder\u2212C4.5    \n500 SMOTE\u2212C4.5\nNaive Bayes   \nHull          \n\n100\n\n90\n\n80\n\n70\n\n60\n\n50\n\n40\n\n30\n\n20\n\n10\n\nP\nT\n%\n\n0\n\n0\n\n10\n\n20\n\n30\n\n40\n\n50\n%FP\n\n60\n\n70\n\n80\n\n90\n\n100\n\nFigure 20: E-state.\n\n(a) Comparison of SMOTE-C4.5, Under-C4.5, and Naive Bayes.\nSMOTE-C4.5 and Under-C4.5 curves intersect in the ROC space; however,\nSMOTE-C4.5 has more potentially optimal classi\ufb01ers, based on the number\nof points on the ROC convex hull.\n\n100\n\n90\n\n80\n\n70\n\n60\n\n50\n\n40\n\n30\n\n20\n\n10\n\nP"
+  },
+  {
+    "paper_id": "Chawla_2002",
+    "chunk_id": 92,
+    "text": "\nT\n%\n\nE\u2212state ROC with Ripper\n\nUnder\u2212Ripper    \n100 SMOTE\u2212Ripper\nLoss Ratio            \nHull                 \n\n0\n\n0\n\n10\n\n20\n\n30\n\n40\n\n50\n%FP\n\n60\n\n70\n\n80\n\n90\n\n100\n\nFigure 21: E-state. Comparison of SMOTE-Ripper, Under-Ripper, and modifying Loss\nRatio in Ripper. SMOTE-Ripper has more potentially optimal classi\ufb01ers, based\non the number of points on the ROC convex hull.\n\n343\n\n\fChawla, Bowyer, Hall & Kegelmeyer\n\nCan ROC\n\nUnder\u2212C4.5    \n100 SMOTE\u2212C4.5\nNaive Bayes   \nHull          \n\n100\n\n90\n\n80\n\n70\n\n60\n"
+  },
+  {
+    "paper_id": "Chawla_2002",
+    "chunk_id": 93,
+    "text": "\n50\n\n40\n\n30\n\n20\n\n10\n\nP\nT\n%\n\n0\n\n0\n\n10\n\n20\n\n30\n\n40\n\n50\n%FP\n\n60\n\n70\n\n80\n\n90\n\n100\n\nFigure 22: Can. Comparison of SMOTE-C4.5, Under-C4.5, and Naive Bayes. SMOTE-\nC4.5 and Under-C4.5 ROC curves overlap for most of the ROC space.\n\nCan ROC with Ripper\n\nUnder\u2212Ripper   \n50 SMOTE\u2212Ripper\nLoss Ratio           \nHull                \n\n100\n\n90\n\n80\n\n70\n\n60\n\n50\n\n40\n\n30\n\n20\n\n10\n\nP\nT\n%\n\n0\n\n0\n\n10\n\n20\n\n30\n\n40\n\n50\n%FP\n\n60\n\n70\n\n80\n\n90\n\n100\n\nFigure 23: Can. Comparison of SMOTE-Ripper, Under-Ripper, and modifying Loss Rat"
+  },
+  {
+    "paper_id": "Chawla_2002",
+    "chunk_id": 94,
+    "text": "io\nin Ripper. SMOTE-Ripper and Under-Ripper ROC curves overlap for most of\nthe ROC space.\n\n344\n\n\fSMOTE\n\nDataset\n\nUnder\n\nPima\nPhoneme\nSatimage\nForest Cover\nOil\nMammography\nE-state\nCan\n\n7242\n8622\n8900\n9807\n8524\n9260\n6811\n9535\n\n50\nSMOTE SMOTE SMOTE SMOTE SMOTE SMOTE\n\n400\n\n500\n\n100\n\n200\n\n300\n\n7307\n8644\n8957\n9832\n8523\n9250\n6792\n9505\n\n8661\n8979\n9834\n8368\n9265\n6828\n9505\n\n9560\n\n8963\n9849\n8161\n9311\n6784\n9494\n\n8975\n9841\n8339\n9330\n6788\n9472\n\n8960\n9842\n8537\n9304\n6779\n9470\n\nTable 3: AUC\u2019s [C4.5 as the base c"
+  },
+  {
+    "paper_id": "Chawla_2002",
+    "chunk_id": 95,
+    "text": "lassi\ufb01er] with the best highlighted in bold.\n\ncurves overlap in the ROC space. For all the other datasets, SMOTE-classi\ufb01er has more\npotentially optimal classi\ufb01ers than any other approach.\n\n5.4 Additional comparison to changing the decision thresholds\n\nProvost (2000) suggested that simply changing the decision threshold should always be\nconsidered as an alternative to more sophisticated approaches. In the case of C4.5, this\nwould mean changing the decision threshold at the leaves of the decision "
+  },
+  {
+    "paper_id": "Chawla_2002",
+    "chunk_id": 96,
+    "text": "trees. For example,\na leaf could classify examples as the minority class even if more than 50% of the training\nexamples at the leaf represent the majority class. We experimented by setting the decision\nthresholds at the leaves for the C4.5 decision tree learner at 0.5, 0.45, 0.42, 0.4, 0.35, 0.32,\n0.3, 0.27, 0.25, 0.22, 0.2, 0.17, 0.15, 0.12, 0.1, 0.05, 0.0. We experimented on the Phoneme\ndataset. Figure 24 shows the comparison of the SMOTE and under-sampling combination\nagainst C4.5 learning by"
+  },
+  {
+    "paper_id": "Chawla_2002",
+    "chunk_id": 97,
+    "text": " tuning the bias towards the minority class. The graph shows that\nthe SMOTE and under-sampling combination ROC curve is dominating over the entire\nrange of values.\n\n5.5 Additional comparison to one-sided selection and SHRINK\n\nFor the oil dataset, we also followed a slightly di\ufb00erent line of experiments to obtain results\ncomparable to (Kubat et al., 1998). To alleviate the problem of imbalanced datasets the\nauthors have proposed (a) one-sided selection for under-sampling the majority class (Kubat"
+  },
+  {
+    "paper_id": "Chawla_2002",
+    "chunk_id": 98,
+    "text": "\n& Matwin, 1997) and (b) the SHRINK system (Kubat et al., 1998). Table 5.5 contains the\nresults from (Kubat et al., 1998). Acc+ is the accuracy on positive (minority) examples and\nAcc\u2212 is the accuracy on the negative (majority) examples. Figure 25 shows the trend for\nAcc+ and Acc\u2212 for one combination of the SMOTE strategy and varying degrees of under-\nsampling of the majority class. The Y-axis represents the accuracy and the X-axis represents\nthe percentage majority class under-sampled. The grap"
+  },
+  {
+    "paper_id": "Chawla_2002",
+    "chunk_id": 99,
+    "text": "hs indicate that in the band of\nunder-sampling between 50% and 125% the results are comparable to those achieved by\nSHRINK and better than SHRINK in some cases. Table 5.5 summarizes the results for the\nSMOTE at 500% and under-sampling combination. We also tried combinations of SMOTE\nat 100-400% and varying degrees of under-sampling and achieved comparable results. The\n\n345\n\n\fChawla, Bowyer, Hall & Kegelmeyer\n\nPhoneme: ROC comparison between SMOTE and C4.5 variation of decision thresholds\n\nSMOTE "
+  },
+  {
+    "paper_id": "Chawla_2002",
+    "chunk_id": 100,
+    "text": "                          \nVarying C4.5 decision thresholds\nHull                            \n\n100\n\n95\n\n90\n\n85\n\n80\n\nP\nT\n%\n\n75\n\n10\n\n20\n\n30\n\n40\n\n50\n\n60\n\n70\n\n80\n\n90\n\n100\n\n%FP\n\nFigure 24: SMOTE and Under-sampling combination against C4.5 learning by tuning the\n\nbias towards the minority class\n\n100\n\n90\n\n80\n\n70\n\n60\n\n50\n\n40\n\ny\nc\na\nr\nu\nc\nc\nA\n\n30\n\n0\n\n100\n\n200\n\nSMOTE and Under\u2212sampling\n\nAccuracy on majority (negative class)\nAccuracy on minority (positive class)\n\n300\n\n400\nPercentage under\u2212sampling of majori"
+  },
+  {
+    "paper_id": "Chawla_2002",
+    "chunk_id": 101,
+    "text": "ty class\n\n500\n\n600\n\n700\n\n800\n\nFigure 25: SMOTE (500 OU) and Under-sampling combination performance\n\nSHRINK approach and our SMOTE approach are not directly comparable, though, as they\nsee di\ufb00erent data points. SMOTE o\ufb00ers no clear improvement over one-sided selection.\n\n346\n\n\fSMOTE\n\nMethod\nSHRINK\nOne-sided selection\n\nAcc+ Acc\u2212\n82.5% 60.9%\n76.0% 86.6%\n\nTable 4: Cross-validation results (Kubat et al., 1998)\n\nUnder-sampling % Acc+ Acc\u2212\n64.7% 94.2%\n10%\n62.8% 91.3%\n15%\n64.0% 89.1%\n25%\n89.5% 78.9%\n50%\n"
+  },
+  {
+    "paper_id": "Chawla_2002",
+    "chunk_id": 102,
+    "text": "83.7% 73.0%\n75%\n78.3% 68.7%\n100%\n84.2% 68.1%\n125%\n83.3% 57.8%\n150%\n85.0% 57.8%\n175%\n81.7% 56.7%\n200%\n89.0% 55.0%\n300%\n95.5% 44.2%\n400%\n98.0% 35.5%\n500%\n98.0% 40.0%\n600%\n96.0% 32.8%\n700%\n90.7% 33.3%\n800%\n\nTable 5: Cross-validation results for SMOTE at 500% SMOTE on the Oil data set.\n\n347\n\n\fChawla, Bowyer, Hall & Kegelmeyer\n\n6. Future Work\n\nThere are several topics to be considered further in this line of research. Automated adaptive\nselection of the number of nearest neighbors would be valuable. "
+  },
+  {
+    "paper_id": "Chawla_2002",
+    "chunk_id": 103,
+    "text": "Di\ufb00erent strategies for\ncreating the synthetic neighbors may be able to improve the performance. Also, selecting\nnearest neighbors with a focus on examples that are incorrectly classi\ufb01ed may improve\nperformance. A minority class sample could possibly have a majority class sample as its\nnearest neighbor rather than a minority class sample. This crowding will likely contribute\nto the redrawing of the decision surfaces in favor of the minority class.\nIn addition to\nthese topics, the following subse"
+  },
+  {
+    "paper_id": "Chawla_2002",
+    "chunk_id": 104,
+    "text": "ctions discuss two possible extensions of SMOTE, and an\napplication of SMOTE to information retrieval.\n\n6.1 SMOTE-NC\n\nWhile our SMOTE approach currently does not handle data sets with all nominal features,\nit was generalized to handle mixed datasets of continuous and nominal features. We call this\napproach Synthetic Minority Over-sampling TEchnique-Nominal Continuous [SMOTE-NC].\nWe tested this approach on the Adult dataset from the UCI repository. The SMOTE-NC\nalgorithm is described below.\n\n1. M"
+  },
+  {
+    "paper_id": "Chawla_2002",
+    "chunk_id": 105,
+    "text": "edian computation: Compute the median of standard deviations of all continuous\nfeatures for the minority class. If the nominal features di\ufb00er between a sample and\nits potential nearest neighbors, then this median is included in the Euclidean distance\ncomputation. We use median to penalize the di\ufb00erence of nominal features by an\namount that is related to the typical di\ufb00erence in continuous feature values.\n\n2. Nearest neighbor computation: Compute the Euclidean distance between the feature\nvector "
+  },
+  {
+    "paper_id": "Chawla_2002",
+    "chunk_id": 106,
+    "text": "for which k-nearest neighbors are being identi\ufb01ed (minority class sample) and\nthe other feature vectors (minority class samples) using the continuous feature space.\nFor every di\ufb00ering nominal feature between the considered feature vector and its\npotential nearest-neighbor, include the median of the standard deviations previously\ncomputed, in the Euclidean distance computation. Table 2 demonstrates an example.\n\nF1 = 1 2 3 A B C [Let this be the sample for which we are computing nearest\nneighbors]"
+  },
+  {
+    "paper_id": "Chawla_2002",
+    "chunk_id": 107,
+    "text": "\nF2 = 4 6 5 A D E\nF3 = 3 5 6 A B K\nSo, Euclidean Distance between F2 and F1 would be:\nEucl = sqrt[(4-1)2 + (6-2)2 + (5-3)2 + Med2 + Med2]\nMed is the median of the standard deviations of continuous features of the mi-\nnority class.\nThe median term is included twice for feature numbers 5: B\u2192D and 6: C\u2192E,\nwhich di\ufb00er for the two feature vectors: F1 and F2.\n\nTable 6: Example of nearest neighbor computation for SMOTE-NC.\n\n348\n\n\fSMOTE\n\n3. Populate the synthetic sample: The continuous features of the n"
+  },
+  {
+    "paper_id": "Chawla_2002",
+    "chunk_id": 108,
+    "text": "ew synthetic minority\nclass sample are created using the same approach of SMOTE as described earlier. The\nnominal feature is given the value occuring in the majority of the k-nearest neighbors.\n\nThe SMOTE-NC experiments reported here are set up the same as those with SMOTE,\nexcept for the fact that we examine one dataset only. SMOTE-NC with the Adult dataset\ndi\ufb00ers from our typical result: it performs worse than plain under-sampling based on AUC,\nas shown in Figures 26 and 27. We extracted only "
+  },
+  {
+    "paper_id": "Chawla_2002",
+    "chunk_id": 109,
+    "text": "continuous features to separate the e\ufb00ect\nof SMOTE and SMOTE-NC on this dataset, and to determine whether this oddity was\ndue to our handling of nominal features. As shown in Figure 28, even SMOTE with only\ncontinuous features applied to the Adult dataset, does not achieve any better performance\nthan plain under-sampling. Some of the minority class continuous features have a very high\nvariance, so, the synthetic generation of minority class samples could be overlapping with\nthe majority class sp"
+  },
+  {
+    "paper_id": "Chawla_2002",
+    "chunk_id": 110,
+    "text": "ace, thus leading to more false positives than plain under-sampling.\nThis hypothesis is also supported by the decreased AUC measure as we SMOTE at degrees\ngreater than 50%. The higher degrees of SMOTE lead to more minority class samples in\nthe dataset, and thus a greater overlap with the majority class decision space.\n\nAdult SMOTE\u2212NC\n\n100\n\n95\n\n90\n\n85\n\n80\n\n75\n\n70\n\n65\n\n60\n\n55\n\nP\nT\n%\n\nUnder\u2212C4.5      \n50 SMOTE\u2212NC\u2212C4.5\nNaive Bayes     \nHull            \n\n50\n\n0\n\n10\n\n20\n\n30\n\n40\n\n50\n%FP\n\n60\n\n70\n\n80\n\n90\n"
+  },
+  {
+    "paper_id": "Chawla_2002",
+    "chunk_id": 111,
+    "text": "\n100\n\nFigure 26: Adult. Comparison of SMOTE-C4.5, Under-C4.5, and Naive Bayes. SMOTE-\nC4.5 and Under-C4.5 ROC curves overlap for most of the ROC space.\n\n6.2 SMOTE-N\n\nPotentially, SMOTE can also be extended for nominal features \u2014 SMOTE-N \u2014 with the\nnearest neighbors computed using the modi\ufb01ed version of Value Di\ufb00erence Metric (Stan\ufb01ll\n& Waltz, 1986) proposed by Cost and Salzberg (1993). The Value Di\ufb00erence Metric (VDM)\nlooks at the overlap of feature values over all feature vectors. A matrix de\ufb01n"
+  },
+  {
+    "paper_id": "Chawla_2002",
+    "chunk_id": 112,
+    "text": "ing the distance\n\n349\n\n\fChawla, Bowyer, Hall & Kegelmeyer\n\nAdult ROC with Ripper\n\nUnder\u2212Ripper     \n50 SMOTE\u2212Ripper \nLoss Ratio    \nHull           \n\n10\n\n20\n\n30\n\n40\n\n50\n%FP\n\n60\n\n70\n\n80\n\n90\n\n100\n\n100\n\n95\n\n90\n\n85\n\nP\nT\n%\n\n80\n\n75\n\n70\n\n65\n\n60\n\n0\n\nFigure 27: Adult. Comparison of SMOTE-Ripper, Under-Ripper, and modifying Loss Ra-\ntio in Ripper. SMOTE-Ripper and Under-Ripper ROC curves overlap for most\nof the ROC space.\n\nAdult only continuous [C4.5]\n\n100\n\n90\n\n80\n\nP\nT\n%\n\n70\n\n60\n\n50\n\n40\n\n0\n\nUnder\n50 SMOTE\n"
+  },
+  {
+    "paper_id": "Chawla_2002",
+    "chunk_id": 113,
+    "text": "\n10\n\n20\n\n30\n\n40\n\n50\n%FP\n\n60\n\n70\n\n80\n\n90\n\n100\n\nFigure 28: Adult with only continuous features. The overlap of SMOTE-C4.5 and Under-\n\nC4.5 is observed under this scenario as well.\n\n350\n\n\fSMOTE\n\nbetween corresponding feature values for all feature vectors is created. The distance \u03b4\nbetween two corresponding feature values is de\ufb01ned as follows.\n\n\u03b4(V1, V2) =\n\nn\n\nX\ni=1\n\n|\n\nC1i\nC1\n\n\u2212\n\nk\n|\n\nC2i\nC2\n\n(1)\n\nIn the above equation, V1 and V2 are the two corresponding feature values. C1 is the total\nnumber of "
+  },
+  {
+    "paper_id": "Chawla_2002",
+    "chunk_id": 114,
+    "text": "occurrences of feature value V1, and C1i is the number of occurrences of feature\nvalue V1 for class i. A similar convention can also be applied to C2i and C2. k is a constant,\nusually set to 1. This equation is used to compute the matrix of value di\ufb00erences for each\nnominal feature in the given set of feature vectors. Equation 1 gives a geometric distance\non a \ufb01xed, \ufb01nite set of values (Cost & Salzberg, 1993). Cost and Salzberg\u2019s modi\ufb01ed VDM\nomits the weight term wa\nf included in the \u03b4 computati"
+  },
+  {
+    "paper_id": "Chawla_2002",
+    "chunk_id": 115,
+    "text": "on by Stan\ufb01ll and Waltz, which has\nan e\ufb00ect of making \u03b4 symmetric. The distance \u2206 between two feature vectors is given by:\n\n\u2206(X, Y ) = wxwy\n\nN\n\nX\ni=1\n\n\u03b4(xi, yi)r\n\n(2)\n\nr = 1 yields the Manhattan distance, and r = 2 yields the Euclidean distance (Cost &\nSalzberg, 1993). wx and wy are the exemplar weights in the modi\ufb01ed VDM. wy = 1 for a\nnew example (feature vector), and wx is the bias towards more reliable examples (feature\nvectors) and is computed as the ratio of the number of uses of a feature "
+  },
+  {
+    "paper_id": "Chawla_2002",
+    "chunk_id": 116,
+    "text": "vector to the number\nof correct uses of the feature vector; thus, more accurate feature vectors will have wx \u2248\n1. For SMOTE-N we can ignore these weights in equation 2, as SMOTE-N is not used for\nclassi\ufb01cation purposes directly. However, we can rede\ufb01ne these weights to give more weight\nto the minority class feature vectors falling closer to the majority class feature vectors; thus,\nmaking those minority class features appear further away from the feature vector under\nconsideration. Since, we are"
+  },
+  {
+    "paper_id": "Chawla_2002",
+    "chunk_id": 117,
+    "text": " more interested in forming broader but accurate regions of the\nminority class, the weights might be used to avoid populating along neighbors which fall\ncloser to the majority class. To generate new minority class feature vectors, we can create\nnew set feature values by taking the majority vote of the feature vector in consideration and\nits k nearest neighbors. Table 6.2 shows an example of creating a synthetic feature vector.\n\nLet F1 = A B C D E be the feature vector under consideration\nand let"
+  },
+  {
+    "paper_id": "Chawla_2002",
+    "chunk_id": 118,
+    "text": " its 2 nearest neighbors be\nF2 = A F C G N\nF3 = H B C D N\nThe application of SMOTE-N would create the following fea-\nture vector:\nFS = A B C D N\n\nTable 7: Example of SMOTE-N\n\n351\n\n\fChawla, Bowyer, Hall & Kegelmeyer\n\n6.3 Application of SMOTE to Information Retrieval\n\nWe are investigating the application of SMOTE to information retrieval (IR). The IR prob-\nlems come with a plethora of features and potentially many categories. SMOTE would have\nto be applied in conjunction with a feature selection a"
+  },
+  {
+    "paper_id": "Chawla_2002",
+    "chunk_id": 119,
+    "text": "lgorithm, after transforming the given\ndocument or web page in a bag-of-words format.\n\nAn interesting comparison to SMOTE would be the combination of Naive Bayes and\nOdds ratio. Odds ratio focuses on a target class, and ranks documents according to their\nrelevance to the target or positive class. SMOTE also focuses on a target class by creating\nmore examples of that class.\n\n7. Summary\n\nThe results show that the SMOTE approach can improve the accuracy of classi\ufb01ers for\na minority class. SMOTE pro"
+  },
+  {
+    "paper_id": "Chawla_2002",
+    "chunk_id": 120,
+    "text": "vides a new approach to over-sampling. The combination\nof SMOTE and under-sampling performs better than plain under-sampling. SMOTE was\ntested on a variety of datasets, with varying degrees of imbalance and varying amounts of\ndata in the training set, thus providing a diverse testbed. The combination of SMOTE and\nunder-sampling also performs better, based on domination in the ROC space, than varying\nloss ratios in Ripper or by varying the class priors in Naive Bayes Classi\ufb01er: the methods\nthat c"
+  },
+  {
+    "paper_id": "Chawla_2002",
+    "chunk_id": 121,
+    "text": "ould directly handle the skewed class distribution. SMOTE forces focused learning\nand introduces a bias towards the minority class. Only for Pima \u2014 the least skewed dataset\n\u2014 does the Naive Bayes Classi\ufb01er perform better than SMOTE-C4.5. Also, only for the Oil\ndataset does the Under-Ripper perform better than SMOTE-Ripper. For the Can dataset,\nSMOTE-classi\ufb01er and Under-classi\ufb01er ROC curves overlap in the ROC space. For all the\nrest of the datasets SMOTE-classi\ufb01er performs better than Under-class"
+  },
+  {
+    "paper_id": "Chawla_2002",
+    "chunk_id": 122,
+    "text": "i\ufb01er, Loss Ratio,\nand Naive Bayes. Out of a total of 48 experiments performed, SMOTE-classi\ufb01er does not\nperform the best only for 4 experiments.\n\nThe interpretation of why synthetic minority over-sampling improves performance where\nas minority over-sampling with replacement does not is fairly straightforward. Consider\nthe e\ufb00ect on the decision regions in feature space when minority over-sampling is done\nby replication (sampling with replacement) versus the introduction of synthetic examples.\nWit"
+  },
+  {
+    "paper_id": "Chawla_2002",
+    "chunk_id": 123,
+    "text": "h replication, the decision region that results in a classi\ufb01cation decision for the minority\nclass can actually become smaller and more speci\ufb01c as the minority samples in the region are\nreplicated. This is the opposite of the desired e\ufb00ect. Our method of synthetic over-sampling\nworks to cause the classi\ufb01er to build larger decision regions that contain nearby minority\nclass points. The same reasons may be applicable to why SMOTE performs better than\nRipper\u2019s loss ratio and Naive Bayes; these meth"
+  },
+  {
+    "paper_id": "Chawla_2002",
+    "chunk_id": 124,
+    "text": "ods, nonetheless, are still learning from\nthe information provided in the dataset, albeit with di\ufb00erent cost information. SMOTE\nprovides more related minority class samples to learn from, thus allowing a learner to carve\nbroader decision regions, leading to more coverage of the minority class.\n\nAcknowledgments\n\nThis research was partially supported by the United States Department of Energy through\nthe Sandia National Laboratories ASCI VIEWS Data Discovery Program, contract number\n\n352\n\n\fSMOTE\n\nD"
+  },
+  {
+    "paper_id": "Chawla_2002",
+    "chunk_id": 125,
+    "text": "E-AC04-76DO00789. We thank Robert Holte for providing the oil spill dataset used in\ntheir paper. We also thank Foster Provost for clarifying his method of using the Satimage\ndataset. We would also like to thank the anonymous reviewers for their various insightful\ncomments and suggestions.\n\n353\n\n\fChawla, Bowyer, Hall & Kegelmeyer\n\nAppendix A. ROC graphs for Oil Dataset\n\nThe following \ufb01gures show di\ufb00erent sets of ROC curves for the oil dataset. Figure 29 (a)\nshows the ROC curves for the Oil datase"
+  },
+  {
+    "paper_id": "Chawla_2002",
+    "chunk_id": 126,
+    "text": "t, as included in the main text; Figure 29(b) shows\nthe ROC curves without the ROC convex hull; Figure 29(c) shows the two convex hulls,\nobtained with and without SMOTE. The ROC convex hull shown by dashed lines and stars\nin Figure 29(c), was computed by including Under-C4.5 and Naive Bayes in the family of\nROC curves. The ROC convex hull shown by solid line and small circles in Figure 29(c) was\ncomputed by including 500 SMOTE-C4.5, Under-C4.5, and Naive Bayes in the family of\nROC curves. The RO"
+  },
+  {
+    "paper_id": "Chawla_2002",
+    "chunk_id": 127,
+    "text": "C convex hull with SMOTE dominates the ROC convex hull without\nSMOTE, hence SMOTE-C4.5 contributes more optimal classi\ufb01ers.\n\nOil ROC\n\nOil\n\n100\n\n90\n\n80\n\n70\n\n60\n\n50\n\n40\n\n30\n\n20\n\n10\n\nP\nT\n%\n\n100\n\n90\n\n80\n\n70\n\n60\n\n50\n\n40\n\n30\n\n20\n\n10\n\nP\nT\n%\n\nUnder\u2212C4.5    \n500 SMOTE\u2212C4.5\nNaive Bayes   \nHull          \n\nUnder\u2212C4.5\n500 SMOTE\u2212C4.5\nNaive Bayes\n\n0\n\n0\n\n10\n\n20\n\n30\n\n40\n\n50\n%FP\n\n(a)\n\n60\n\n70\n\n80\n\n90\n\n100\n\n0\n\n0\n\n10\n\n20\n\n30\n\n40\n\n60\n\n70\n\n80\n\n90\n\n100\n\n50\n%FP\n\n(b)\n\nOil ROC Convex Hulls\n\n100\n\n90\n\n80\n\n70\n\n60\n\n50\n\n40\n\n30"
+  },
+  {
+    "paper_id": "Chawla_2002",
+    "chunk_id": 128,
+    "text": "\n\n20\n\n10\n\nP\nT\n%\n\nConvex Hull with SMOTE\nConvex Hull without SMOTE\n\n0\n\n0\n\n10\n\n20\n\n30\n\n40\n\n50\n%FP\n\n(c)\n\n60\n\n70\n\n80\n\n90\n\n100\n\nFigure 29: ROC curves for the Oil Dataset.\n\n(a) ROC curves for SMOTE-C4.5, Under-\nC4.5, Naive Bayes, and their ROC convex hull. (b) ROC curves for SMOTE-\nC4.5, Under-C4.5, and Naive Bayes. (c) ROC convex hulls with and without\nSMOTE.\n\n354\n\n\fSMOTE"
+  },
+  {
+    "paper_id": "LI2023103017",
+    "chunk_id": 0,
+    "text": "Computers & Security 125 (2023) 103017 \n\nContents lists available at ScienceDirect \n\nComputers  &  Security \n\njournal homepage: www.elsevier.com/locate/cose \n\nCross-domain  vulnerability  detection  using  graph  emb e dding  and \ndomain  adaptation \n\nXin Li a , b , \u2217, Yang Xin b , c , Hongliang Zhu b , Yixian Yang b , c , Yuling Chen c \na \nShandong Provincial Key Laboratory of Computer Networks, Shandong Computer Science Center (National Supercomputer Center in Jinan), Qilu University \nof Techn"
+  },
+  {
+    "paper_id": "LI2023103017",
+    "chunk_id": 1,
+    "text": "ology (Shandong Academy of Sciences), Jinan 250014, China \nb \nSchool of Cyberspace Security, Beijing University of Posts and Telecommunications, Beijing 100876, China \nc \nState Key Laboratory of Public Big Data, College of Computer Science and Technology, Guizhou University, Guiyang 550025, China \n\na r t i c l e \n\ni n f o \n\na b s t r a c t \n\nArticle history: \nReceived 20 January 2022 \nRevised 13 October 2022 \nAccepted 15 November 2022 \nAvailable online 17 November 2022 \n\nKeywords: \nCross-domain "
+  },
+  {
+    "paper_id": "LI2023103017",
+    "chunk_id": 2,
+    "text": "\nVulnerability detection \nGraph embedding \nDomain adaption \nSoftware security \n\nVulnerability detection is an effective means to maintain cyberspace security. Machine learning meth- \nods have risen much attention in software security due to their advantage of accuracy and automation. \nHowever, current researches mainly focus on in-domain vulnerability detection where the training data \nand test data belong to the same domain. Due to application scenarios, coding habits, and other factors, \nvulne"
+  },
+  {
+    "paper_id": "LI2023103017",
+    "chunk_id": 3,
+    "text": "rabilities in different software projects may obey different probability distributions. This discrep- \nancy compromises the performance of machine learning methods when they are applied to a brand-new \nproject. To address this cold start problem, we propose a cross-domain vulnerability detection frame- \nwork using graph embedding and deep domain adaption (VulGDA). It works in a variety of cross-domain \nfashions, including the Zero-Shot fashion that no labeled data in the target domain is availab"
+  },
+  {
+    "paper_id": "LI2023103017",
+    "chunk_id": 4,
+    "text": "le for train- \ning. VulGDA is decomposed to graph embedding and domain adaptation. At the graph embedding stage, \nwe transform the samples in source code into graph representations where elements are directly con- \ncatenated according to their syntactic and semantic relationships. Then, we aggregate information from \nneighbors and edges de\ufb01ned in the graph into real-valued vectors. By graph embedding, VulGDA extracts \ncomprehensive vulnerability features and compromises the challenge of long-ter"
+  },
+  {
+    "paper_id": "LI2023103017",
+    "chunk_id": 5,
+    "text": "m dependency. Aiming \nat the discrepancy between training data and test data, domain adaption is used to train a feature gen- \nerator. This feature generator maps the graph embedding to a \u201cdeep\u201d feature that is discriminative for \nvulnerability detection, and invariant to the shift between domains. We perform a systematic experiment \nto validate the effectiveness of VulGDA. The results show that combining graph embedding and deep \ndomain adaptation promotes VulGDA\u2019s performance in cross-domain v"
+  },
+  {
+    "paper_id": "LI2023103017",
+    "chunk_id": 6,
+    "text": "ulnerability detection. Compared \nwith the state-of-the-art methods, our method has better performance under the cold start condition. \n\n\u00a9 2022 Elsevier Ltd. All rights reserved. \n\n1. Introduction \n\nComputer software is playing an increasingly important role in \neconomic and social development. Unfortunately, software security \nis seriously compromised by vulnerabilities. The number of soft- \nware vulnerabilities disclosed has increased rapidly in recent years. \nAccording to US-CERT\u2019s annual rep"
+  },
+  {
+    "paper_id": "LI2023103017",
+    "chunk_id": 7,
+    "text": "ort, 19,915 vulnerabilities were \nrecorded by the US National Vulnerability Database (NVD) in 2021, \n\n\u2217 Corresponding author at: Shandong Provincial Key Laboratory of Computer Net- \nworks, Shandong Computer Science Center (National Suptercomputer Center in Ji- \nnan), Qilu University of Technology (Shandong Academy of Sciences), China. \n\nE-mail address: li_xin@bupt.edu.cn (X. Li) . \n\nhttps://doi.org/10.1016/j.cose.2022.103017 \n0167-4048/\u00a9 2022 Elsevier Ltd. All rights reserved. \n\nwhich is the \ufb01ft"
+  },
+  {
+    "paper_id": "LI2023103017",
+    "chunk_id": 8,
+    "text": "h consecutive year with a record number of vul- \nnerabilities ( Information Technology Laboratory 2022 ). \n\nOnce  software  vulnerabilities  are  discovered  and  exploited \nby  attackers,  information  systems  will  suffer  from  information \nleakage,  service  interruption,  and  data  tampering  ( Zhao  et  al., \n2020 ).  According  to  Positive  Technologies\u2019  annual  report,  93%  of \ntested  networks  are  vulnerable  to  breach  due  to  the  vulnerabil- \nity. In 71% of cases, the attack"
+  },
+  {
+    "paper_id": "LI2023103017",
+    "chunk_id": 9,
+    "text": "er could seriously affect businesses \n( Lemos, 2022 ). On May 7, 2021, the United States declared a na- \ntional emergency due to a cyber-attack on its energy system and \npaid  a  ransom  of  up  to  5  million  dollars  ( Turton  and  Mehro- \ntra, 2021 ). According to statistics, the average outage time caused \nby  cyberspace  attacks  reached  12  days  in  2020,  while  agencies \nspent an average of 1.4 to 13 million dollars responding to cyber- \n\n\fX. Li, Y. Xin, H. Zhu et al. \n\nComputers & Se"
+  },
+  {
+    "paper_id": "LI2023103017",
+    "chunk_id": 10,
+    "text": "curity 125 (2023) 103017 \n\nattacks ( Bissell and Lasalle, 2022 ). Given the frequency of cyber- \nattacks in recent years, vulnerabilities have become an important \nfactor affecting cyberspace security ( Zhao et al., 2018 ). Vulnerabil- \nity detection is a key method to improve software quality and se- \ncurity. \n\nMachine  learning  has  unique  advantages  in  the  accuracy \nand automation of vulnerability detection. Vulnerability detection \nbased on machine learning has become a hot research dir"
+  },
+  {
+    "paper_id": "LI2023103017",
+    "chunk_id": 11,
+    "text": "ection \nand plays an important role in maintaining software security. Cur- \nrent research is mainly focused on in-domain vulnerability detec- \ntion.  They  assume  that  training  data  and  test  data  are  indepen- \ndently  and  identically  distributed.  Based  on  this  hypothesis,  the \ngeneralization error of the model can be de\ufb01ned by the training \nerror and the number of training data ( Zheng et al., 2022 ; Li et al., \n2022 ).  Excellent  performances  are  achieved  when  the  detection"
+  },
+  {
+    "paper_id": "LI2023103017",
+    "chunk_id": 12,
+    "text": " \nmodels  work  in  an  in-domain  fashion,  especially  on  a  synthetic \ndataset. However, most software projects in the real world have \nlittle or no historical vulnerability information, such as programs \nunder development. In this case, detection models need to be ap- \nplied  to  new  data  and  new  scenarios  (target  domain)  indepen- \ndent of training data (source domain). Due to coding style, appli- \ncation scenarios, and other factors, vulnerability features in differ- \nent software p"
+  },
+  {
+    "paper_id": "LI2023103017",
+    "chunk_id": 13,
+    "text": "rojects may obey different probability distributions. \nThis discrepancy hinders the performance of the machine learning \nmodel in cross-domain vulnerability detection ( Chakraborty et al., \n2021 ). \n\nIn this paper, we propose a Zero-Shot learning method that de- \ntects cross-domain vulnerabilities using graph embedding and do- \nmain adaption. To extract comprehensive vulnerability features, a \ngraph embedding method is proposed that transforms samples in \nsource code form into real-valued vector"
+  },
+  {
+    "paper_id": "LI2023103017",
+    "chunk_id": 14,
+    "text": "s. In this stage, elements \nand corresponding relationships in samples are extracted to form \ngraph-based intermediate representations. Then, GGNN is applied \nto learn features from neighbors and edges de\ufb01ned in the graph. \nThe feature vector of a sample is generated by aggregating infor- \nmation from all the nodes in the graph. In the domain adaptation \nstage, we use a deep neural network to learn a feature generator. \nThis generator builds the mappings between the source and the \ntarget domain"
+  },
+  {
+    "paper_id": "LI2023103017",
+    "chunk_id": 15,
+    "text": "s so that the \ufb01nal detection reports could be made \nbased on features that are both discriminative and invariant to the \nshift between domains. \n\nThe main contributions of this paper are as follows. \n\n(1) We  propose  a  cross-domain  vulnerability  detection  frame- \nwork VulGDA that combines graph embedding and domain \nadaptation.  For  generalization,  VulGDA  works  in  the  Zero- \nShot fashion, which is the strictest fashion in cross-domain \ndetection. VulGDA is also suitable for the Few-Sh"
+  },
+  {
+    "paper_id": "LI2023103017",
+    "chunk_id": 16,
+    "text": "ot and the \nin-domain fashions by adding supervised information in the \ntarget domain into the training data. \n\n(2) A  graph  embedding  method  is  proposed  to  extract  com- \nprehensive vulnerability characters. The output vectors are \nlearned on a graph where syntactic and semantic informa- \ntion is displayed explicitly. In this way, we reduce the inter- \nference of noise on the vulnerability characteristics. \n\n(3) We propose a neural network to learn a feature generator. \nThis feature gener"
+  },
+  {
+    "paper_id": "LI2023103017",
+    "chunk_id": 17,
+    "text": "ator gets optimized by reducing both the \nclassi\ufb01cation loss and the domain discrepancy. Finally, this \nfeature generator transfers the learned vulnerability patterns \nin the source domain to the target domain. \n\n(4) We implement a prototype and conduct a systematic exper- \niment. The result shows the application of graph embedding \nand  domain  adaptation  improves  the  performance  of  Vul- \nGDA. Compared with the existing methods, VulGDA achieves \na  better  performance  in  cross-domain  vu"
+  },
+  {
+    "paper_id": "LI2023103017",
+    "chunk_id": 18,
+    "text": "lnerability  detec- \ntion. \n\n2. Related work \n\nSoftware  vulnerability  detection  is  a  fundamental  problem  in \ncyberspace security. The machine learning detection approach has \nreceived much attention from the research community due to its \nadvantages in automation and accuracy. Our discussion mainly fo- \ncuses  on  vulnerability  representation  learning  and  cross-domain \nvulnerability  detection.  They  are  the  two  key  aspects  of  our  re- \nsearch. \n\n2.1. Vulnerability representati"
+  },
+  {
+    "paper_id": "LI2023103017",
+    "chunk_id": 19,
+    "text": "on learning \n\nVulnerability representation learning is the process that trans- \nforms  samples  in  source  code  into  real-valued  vectors  so  that  a \nmachine learning model can make detection decisions. According \nto  the  way  of  generating  the  vulnerability  feature  vector,  repre- \nsentation learning can be divided into statistic-based methods and \npattern-based methods ( Hanif et al., 2021 ). \n\nIn the early stages, statistic-based methods are exploited to de- \ntect  vulnerabilities."
+  },
+  {
+    "paper_id": "LI2023103017",
+    "chunk_id": 20,
+    "text": "  Based  on  the  assumption  that  complexity  is \nthe enemy of software security, source code complexity is \ufb01rst in- \ntroduced  into  vulnerability  detection  ( Moshtari  and  Sami,  2016 ). \nFenton  and  Bieman  (2014)  \ufb01nd  that  complexity  alone  is  not \nenough  to  re\ufb02ect  all  statistical  characteristics  of  vulnerabilities. \nHence, they proposed a measurement method combining complex- \nity, cohesion, and coupling. Furthermore, Zagane et al. (2020) pro- \npose a detection framework ba"
+  },
+  {
+    "paper_id": "LI2023103017",
+    "chunk_id": 21,
+    "text": "sed on coupling and \ufb01nd that vul- \nnerabilities  are  more  likely  to  occur  in  codes  with  high  com- \nplexity, high cohesion, and low coupling. Inspired by previous re- \nsearch, more statistical indicators, including dependency measure \n( Morrison et al., 2015 ), token frequency ( Hovsepyan et al., 2016 ), \ndeveloper activity indicator ( Perl et al., 2015 ), and execution com- \nplexity ( Shin and Williams, 2011 ), are introduced into vulnerability \ndetection. These newly introduced statist"
+  },
+  {
+    "paper_id": "LI2023103017",
+    "chunk_id": 22,
+    "text": "ical features improve the \nperformance of vulnerability detection to a certain extent. \n\nDue  to  the  advantages  of  speediness  and  easily  acquired \ndatasets, statistic-based methods are widely used in vulnerability \ndetection in the early stage. However, they fail to learn syntactic \nand semantic features, leading to low accuracy. In addition, their \ncoarse detection granularity requires additional effort and time for \ndevelopers to locate and understand vulnerabilities. \n\nTo alleviate the"
+  },
+  {
+    "paper_id": "LI2023103017",
+    "chunk_id": 23,
+    "text": " bottleneck of statistic-based methods, pattern- \nbased methods are proposed. They transform source codes into in- \ntermediate representations that have clear syntactic and semantic \ninformation. Then, machine learning models are applied to learn \nvulnerability patterns  from intermediate representations. Accord- \ning  to  the  types  of  intermediate  representations,  pattern-based \nmethods are divided into 3 types: sequence-based, tree-based, and \ngraph-based methods ( Lin et al., 2020 ). \n\nS"
+  },
+  {
+    "paper_id": "LI2023103017",
+    "chunk_id": 24,
+    "text": "equence-based  methods  convert  software  source  codes  into \nlinear token sequences and learn vulnerability characteristics from \nthem.  Bugram  ( Wang  et  al.,  2016 )  applies  N-Gram  on  a  to- \nken sequence and selects features based on con\ufb01dence and sup- \nport.  LAVDNN  ( Li  et  al.,  2019 )  extracts  all  function  names  to \nform a sequence and applies Bi-directional Long Short-Term Mem- \nory  (Bi-LSTM)  to  learn  features.  Russell  et  al.  (2018)  propose  a \nfunction-level sou"
+  },
+  {
+    "paper_id": "LI2023103017",
+    "chunk_id": 25,
+    "text": "rce code vulnerability detection framework that \nlearns vulnerability patterns and trains a classi\ufb01er independently. \nVulDeePecker  ( Li et  al.,  2018 ) utilizes data \ufb02ow  analysis and Bi- \nLSTM to extract vulnerability features, reaching a state-of-the-art \nperformance. Wang et al. (2020) further propose a multi-class vul- \nnerability detection model based on textCNN and softmax. SySeVr \n( Li  et  al.,  2022 )  improves  detection  performance  by  taking  both \ndata \ufb02ow and control \ufb02ow into c"
+  },
+  {
+    "paper_id": "LI2023103017",
+    "chunk_id": 26,
+    "text": "onsideration. Their research indi- \ncates that the application of static analysis on intermediate repre- \nsentation can improve the quality of learned vulnerability patterns. \n\n2 \n\n\fX. Li, Y. Xin, H. Zhu et al. \n\nComputers & Security 125 (2023) 103017 \n\nDue to the vulnerability patterns learned from sequential inter- \nmediate  representations,  sequence-based  methods  achieve  better \nperformance than statistic-based ones. However, they are suscep- \ntible to long-term dependency and semantic lo"
+  },
+  {
+    "paper_id": "LI2023103017",
+    "chunk_id": 27,
+    "text": "ss because of their \nsequential structure. \n\nTree-based  methods  are  proposed  to  learn  syntactic  features. \nThey  transform  source  code  into  Abstract  Syntax  Tree  (AST), \nand  apply  a  tree-based  neural  network  on  it.  Vytovtov  and \nChuvilin  (2019)  use  a  graph  neural  network  to  learn  vulnera- \nbility  features  and  utilize  K-mean  to  classify  Java  codes.  TBCNN \n( Mou et al., 2016 ) uses negative sampling to learn node embed- \nding. A \ufb01xed-depth feature detector s"
+  },
+  {
+    "paper_id": "LI2023103017",
+    "chunk_id": 28,
+    "text": "lides across the whole AST \nto extract features. ASTNN ( Zhang et al., 2019 ) divides AST into a \nseries of subtrees, considering the long-term dependency in AST. \nThen  Recurrent  Neural  Network  (RNN)  is  applied  to  the  subtree \nsequence to capture the lexical and syntactic information at the \nstatement level. Eriguchi et al. (2016) convert sequences into bi- \nnary trees in natural language processing and use LSTM to learn \nword  embedding  in  a  bottom-up  manner.  Liu  et  al.  (2019) "
+  },
+  {
+    "paper_id": "LI2023103017",
+    "chunk_id": 29,
+    "text": " use \ndepth-\ufb01rst traversal to map the nodes of AST to elements of vec- \ntors and use fuzzy-based oversampling to solve the category im- \nbalance problem. \n\nTree-based approaches have advantages in learning syntactic re- \nlationships. However, the size of AST is increased because of the \nnewly added nodes, which exacerbates the distance between ele- \nments. Therefore, tree-based approaches have poor performance in \nsemantic information learning. \n\nTo  alleviate  the  long-term  dependency  issue "
+  },
+  {
+    "paper_id": "LI2023103017",
+    "chunk_id": 30,
+    "text": " of  sequence- \nbased and tree-based methods, graph-based representation learn- \ning methods are proposed. In a graph representation, elements are \nlinked directly according to their syntactic and semantic relation- \nships. Then, a graph-based neural network is applied to learn fea- \ntures on the graph representation. Common Graph structures in- \nclude Control Flow Graph (CFG), Data Flow Graph (DFG), program \ndependency  Graph  (PDG),  Call  Graph  (CG),  Code  Property  Graph \n(CPG).  Inspired "
+  },
+  {
+    "paper_id": "LI2023103017",
+    "chunk_id": 31,
+    "text": " by  Doc2Vec,  Graph2Vec  ( Narayanan  et  al.,  2017 ) \nutilizes subgraph embedding and negative sampling in the graph \nclassi\ufb01cation task. GBCNN ( Phan et al., 2017 ) constructs CFG us- \ning assembly instruction and uses \ufb01xed-size \ufb01lters sliding across \nthe whole CFG  to learn features.  Devign ( Zhou et al.,  2019 ) and \nFUNDED ( Wang et al., 2021 ) transform functions into CPG, and use \nGated Graph Neural Network (GGNN) to learn features from it. Re- \nVeal ( Chakraborty et al., 2021 ) applie"
+  },
+  {
+    "paper_id": "LI2023103017",
+    "chunk_id": 32,
+    "text": "s the metric learning method \nbesides GGNN and CPG. Literature ( Hellendoorn et al., 2020 ) learns \nthe characteristics of software source code on PDG, and uses sub- \ntoken  to  learn  node  embedding.  IVDETECT  ( Li  et  al.,  2021 )  uses \nGCN to learn vulnerability features on PDG, and uses the attention \nmechanism to locate the vulnerable part. \n\nCompared with sequence and tree structures, the graph struc- \nture is free of structural limitations. Thus, graph-based represen- \ntation learning"
+  },
+  {
+    "paper_id": "LI2023103017",
+    "chunk_id": 33,
+    "text": " methods can learn not only lexical and syntactic \ninformation but also semantic information. In addition, the long- \nterm  dependency  issue  is  avoided  because  of  the  directly  con- \nnected  elements.  In  the  vulnerability  detection  task,  considering \nthe improvement of detection performance, the extra computation \ncaused by the graph-based representation learning method is ac- \nceptable. \n\n2.2. Cross-domain vulnerability detection \n\ndomain  detection  challenge,  transfer  learning "
+  },
+  {
+    "paper_id": "LI2023103017",
+    "chunk_id": 34,
+    "text": " is  introduced  into \nvulnerability detection tasks. \n\nStatistic-based  transfer  learning  methods  are  \ufb01rst  ap- \nplied  to  cross-domain  vulnerability  detection  tasks.  Literature \n( Kalouptsoglou  et  al.,  2020 )  detects  cross-domain  vulnerabili- \nties  through  feature  selection.  However,  this  approach  requires \nthe  software  metrics  of  the  source  and  target  domains  to  be \nisomorphic,  which  limits  its  application  scenarios.  Literature \n( Nam  et  al.,  2013 )  u"
+  },
+  {
+    "paper_id": "LI2023103017",
+    "chunk_id": 35,
+    "text": "ses  migration  component  analysis  to  map \nsoftware  metrics  in  the  source  and  target  domains  to  the  same \nfeature space. Li et al. (2018) utilize instance weight migration to \ndetect cross-domain vulnerabilities. Despite the advantage of little \ncomputation, statistic-based methods still suffer low accuracy. \n\nPattern-based  cross-domain  vulnerability  detection  methods \ntransfer the vulnerability pattern learned in the source domain to \nthe  target  domain.  Lin  et  al.  (2018) "
+  },
+  {
+    "paper_id": "LI2023103017",
+    "chunk_id": 36,
+    "text": " \ufb01rst  noticed  the  generaliza- \ntion problem in pattern-based vulnerability detection methods and \nproposed  a  shallow  tree-based  cross-domain  vulnerability  detec- \ntion method. Hellendoorn et al. (2019) proposed a \ufb01le-level cross- \ndomain vulnerability detection method combining local syntactic \nfeatures and global semantic features. However, their method suf- \nfers from \ufb01le-level detection granularity. POSTER ( Lin et al., 2017 ) \nis a model-transfer method, which trains representation "
+  },
+  {
+    "paper_id": "LI2023103017",
+    "chunk_id": 37,
+    "text": "learning \nmodel and classi\ufb01er independently. Its performance is highly de- \npendent  on  the  quality  of  training  data.  Lin  et  al.  (2021)  pro- \nposed a detection model with few labeled data in the target do- \nmain. 2 LSTMs are trained in the source and target domains re- \nspectively. Their outputs are combined to serve as learned vulner- \nability features. CD-VulD ( Liu et al., 2020 ) uses a metric transfer \nlearning framework (MTLF) ( Xu et al., 2017 ) to bridge the gap be- \ntween diffe"
+  },
+  {
+    "paper_id": "LI2023103017",
+    "chunk_id": 38,
+    "text": "rent domains\u2019 distribution. Literature ( Lin et al., 2021 )- \n[43] are Few-Shot learning methods that require few training data \nin the target domain, limiting their application to projects with- \nout  history  vulnerability  information.  Nguyen  et  al.  (2019)  pro- \npose a Zero-Shot learning method using LSTM and deep domain \nadaptation  neural  network  (DaNN).  It  is  the  \ufb01rst  method  to  de- \ntect cross-domain vulnerability without supervised information in \nthe target domain. However,"
+  },
+  {
+    "paper_id": "LI2023103017",
+    "chunk_id": 39,
+    "text": " its performance is compromised by its \nsequence-based representation learning model. \n\nCompared  with  the  statistic-based  transfer  learning  methods, \npattern-based methods have \ufb02exible detection granularity and high \naccuracy.  However,  there  is  still  little  research  on  cross-domain \nvulnerability detection, especially in the Zero-Shot fashion. Further- \nmore, existing pattern-based methods mainly use sequence-based \nrepresentation learning, suffering from long-term dependency and \n"
+  },
+  {
+    "paper_id": "LI2023103017",
+    "chunk_id": 40,
+    "text": "semantic loss. \n\n3. Problem and method \n\nVulGDA  aims  to  detect  vulnerabilities  in  real-world  software. \nFor practicability, this paper considers the most stringent condi- \ntion.  That  is,  the  detection  model  trained  in  the  source  domain \nis applied to detect vulnerabilities in the target domain, and the \nmodel cannot obtain any supervised information from the target \ndomain  during  the  training  (Zero-Shot).  This  assumption  allows \nVulGDA to have a \ufb01ne generalization and to "
+  },
+  {
+    "paper_id": "LI2023103017",
+    "chunk_id": 41,
+    "text": "be easily applied to \nother cross-domain detection situations, such as the project whose \nhistorical  vulnerability  data  is  few  (Few-Shot)  or  abundant  (In- \ndomain). \n\n3.1. Problem formalization \n\nDue  to  application  scenarios,  coding  habits,  and  other  fac- \ntors, vulnerability features of different software projects may obey \ndifferent probability distributions. Therefore, the detection model \ntrained on limited training data has poor performance when it is \napplied  to  a  new  p"
+  },
+  {
+    "paper_id": "LI2023103017",
+    "chunk_id": 42,
+    "text": "roject  in  the  real  world.  To  solve  this  cross- \n\nWe formalize vulnerability detection as a binary classi\ufb01cation \nproblem. Let X be the input space, Y = { 0 , 1 } be the label set. D S \nand D T  are two different distributions on X \u00d7 Y  that represent dis- \ntributions in the source and target domains respectively. We as- \n\n3 \n\n\fX. Li, Y. Xin, H. Zhu et al. \n\nComputers & Security 125 (2023) 103017 \n\nFig. 1.  The overview of VulGDA. \n\nsume that both distributions are complex and unknown, an"
+  },
+  {
+    "paper_id": "LI2023103017",
+    "chunk_id": 43,
+    "text": "d sim- \nilar  but  different.  Our  detection  architecture  is  assumed  to  have \n\u223c ( D s ) n \naccess  to  a  labeled  dataset  S = { ( x \ni ) } n \nin the source \ndomain and an unlabeled dataset T = { ( x \ni = n +1 \u223c ( D X \nT ) \nin the \ntarget domain. N is the total number of training samples, and D X \nT \nis  the  marginal  distribution  of  D T  on  X.  Our  ultimate  goal  is  to \n(\u03b7) = \nbuild a predictor \u03b7 : X \u2192 Y  with a low target risk: min R D \nT \n( \u03b7( x ) (cid:5) = y ) , while having no"
+  },
+  {
+    "paper_id": "LI2023103017",
+    "chunk_id": 44,
+    "text": " supervised information in D T . \nPr \n( x,y ) \u223cD \nT \n\ni =1 \ni ) } N \n\ni , y \n\nN\u2212n \n\n3.2. Method overview \n\nAs shown in Fig. 1 , VulGDA takes function-level samples as in- \nput. Source Samples refer to the labeled training data where super- \nvised information lies. They are used in the entire training stage \nincluding  graph  embedding  and  domain  adaptation.  Target  Sam- \nples refer to the unlabeled training data coming from the target \ndomain. They are only used in the domain adaptation stag"
+  },
+  {
+    "paper_id": "LI2023103017",
+    "chunk_id": 45,
+    "text": "e. Test \nSamples come from the target domain. They are utilized to verify \nthe detection ability of trained architecture in cross-domain sce- \nnarios. \n\nVulGDA  consists  of  2  stages:  graph  embedding  and  domain \nadaptation. The purpose of the graph embedding stage is to trans- \nform vulnerability samples in source code into real-valued vectors \nthat can be processed by machine learning models. Hence, through \nsyntactic and semantic analysis, the graph embedding stage \ufb01rst \ntransforms a sam"
+  },
+  {
+    "paper_id": "LI2023103017",
+    "chunk_id": 46,
+    "text": "ple into CPG, an intermediate representation in \nthe graph structure. In CPG, syntactically and semantically related \nelements are directly concatenated, which relieves the long-term \ndependency issue and the divergence between domains. Then, pre- \ntrained word embedding is utilized to generate token embedding \nand  node  embedding.  Finally,  we  use  GGNN  to  obtain  the  em- \nbedding vectors by propagating and aggregating information from \nneighbors de\ufb01ned in the CPG. The domain adaptation s"
+  },
+  {
+    "paper_id": "LI2023103017",
+    "chunk_id": 47,
+    "text": "tage aims \nto learn a feature generator that shifts distributions between do- \nmains.  A  neural  network  that  consists  of  a  feature  generator,  a \nclassi\ufb01er and a bottleneck is proposed to learn this feature genera- \ntor. The classi\ufb01er that takes features in the source domain as input \ngenerates the classi\ufb01cation loss. The bottleneck measures the dis- \ncrepancy between the features in the source and target domains. \nThe  feature generator gets optimized by  minimizing both  classi- \n\ufb01cati"
+  },
+  {
+    "paper_id": "LI2023103017",
+    "chunk_id": 48,
+    "text": "on loss and domain discrepancy. The detection result is re- \nported by a classi\ufb01er trained by the generated \u201cdeep\u201d features. Af- \nter the above phases, VulGDA can detect cross-domain vulnerabili- \nties without labeled data in the target domain. \n\n4. Graph embedding \n\nThe graph embedding stage constructs a function \u03d5 : X \u2192 X G , \nthat transforms a sample x in source code into a real-valued vector \n\nx G \u2208 R d . To do so, we transformed a sample into an intermediate \nrepresentation in graph form, a"
+  },
+  {
+    "paper_id": "LI2023103017",
+    "chunk_id": 49,
+    "text": "nd apply a graph neural network to \nlearn features from it. \n\n4.1. Graph representation \n\nSamples in source code cannot be processed by the neural net- \nwork directly. To extract the vulnerability features, they need to \nbe transformed into intermediate representations in a proper form. \nThe  quality  of  the  intermediate  representations  determines  how \nmany features can be extracted from the training data. Compared \nwith  the  sequence,  the  graph  form  is  free  of  structural  limita- \n"
+  },
+  {
+    "paper_id": "LI2023103017",
+    "chunk_id": 50,
+    "text": "tions  where  syntactically  and  semantically  related  nodes  are  di- \nrectly connected. Edges on a graph representation direct the way \nof information propagation and aggregation in a graph neural net- \nwork. We utilize CPG as the intermediate representation between \nsource codes and \u201cdeep\u201d features. CPG combines the control \ufb02ow, \ndata dependency, and syntactic information so that it can repre- \nsent comprehensive vulnerability characteristics. \n\nThe CP G = (V, E) of a function is a heteroge"
+  },
+  {
+    "paper_id": "LI2023103017",
+    "chunk_id": 51,
+    "text": "neous multidigraph. \nnode } is the set of nodes in CPG. AST \nV = { v | v \u2208 AST \nnode denotes the \nnodes in the AST of the function. Each node consists of type and \nsource code. E = { e | e \u2208 CF G \nedge } is the set \nedge or e \u2208 P DG \nof edges in the CPG, which are added according to the control de- \npendencies, data dependencies, and syntactic relationships of the \nsource code. CF G \nedge denote the edges de\ufb01ned \nedge , and AST \nin the CFG, PDG, and AST respectively. \n\nedge or e \u2208 AST \n\nedge , P"
+  },
+  {
+    "paper_id": "LI2023103017",
+    "chunk_id": 52,
+    "text": " DG \n\nTo obtain the CPG, the sample in the source code is parsed into \nAST \ufb01rst. Then based on AST, control \ufb02ow analysis is applied to \ngenerate CFG, and dependency analysis is applied to obtain PDG. \nAt last, we get the \ufb01nal CPG by connecting the nodes in AST using \ncorresponding edges in CFG and PDG. \n\nFig.  2 (a)  shows  an  example  of  a  stack  buffer  over\ufb02ow  vul- \nnerability. In the function  \u201cmain\u201d, line 2  allocates a  stack  buffer \n\u201cbuf\u201d of 264 bytes. Line 4 copies data from the cus"
+  },
+  {
+    "paper_id": "LI2023103017",
+    "chunk_id": 53,
+    "text": "tomer-controlled \nvariable \u201cargv[1]\u201d into buffer \u201cbuf\u201d. This operation may cause the \nbuffer over\ufb02ow because of the unlimited copying. Fig. 2 (b) and 2 (c) \nare the sequence-based and the graph-based intermediate repre- \nsentation  of  the  function  \u201cmain\u201d respectively.  In  the  former,  se- \nmantic  information is  hidden  in  the  sequential relationships be- \ntween  tokens,  leading  to  long-term  dependency.  In  the  exam- \nple,  whether  \u201cstrcpy\u201d is  vulnerable  is  dependent  on  the  "
+  },
+  {
+    "paper_id": "LI2023103017",
+    "chunk_id": 54,
+    "text": "size  of \n\u201cbuf\u201d and  \u201cargv[1]\u201d.  However,  their  de\ufb01nition  and  use  are  dis- \ntributed in different parts of the sequence-based representation in \nFig. 2 (b). For instance, the use of \u201cbuf\u201d in line 4 is de\ufb01ned in line \n1. There are 19 elements between the use and the de\ufb01nition of it \nin the sequence-based intermediate representation, hindering the \nlearning of their relationship. In the CPG, elements with syntac- \ntic and semantic relationships are connected directly. For instance, \nin  Fig."
+  },
+  {
+    "paper_id": "LI2023103017",
+    "chunk_id": 55,
+    "text": "  2 (c),  \u201cbuf\u201d and  \u201cargv[1]\u201d in  \u201cstrcpy(buf,  arg[1])\u201d are  con- \n\n4\n\n\fX. Li, Y. Xin, H. Zhu et al. \n\nComputers & Security 125 (2023) 103017 \n\nFig. 2.  Buffer over\ufb02ow vulnerability and its intermediate representations. \n\nnected to their corresponding declaration and assignment by data \ndependency  edges.  In  addition,  a  control  dependency  edge  con- \nnected \u201cstrcpy(buf, arg[1])\u201d and \u201cif(arvc > 1)\u201d shows the execution \ncondition. The direct connection gives CPG a clear description of \nthe"
+  },
+  {
+    "paper_id": "LI2023103017",
+    "chunk_id": 56,
+    "text": " vulnerability, reducing the interference of noise. Furthermore, \nthis direct connection alleviates the divergence of feature distribu- \ntions caused by programming styles among different vulnerability \nprojects. \n\n4.2. Graph neural network \n\nFurther, a graph neural network is used to learn syntactic and \nsemantic information on the graph representation so that we can \nobtain the graph embedding of a sample. That is each graph rep- \nresentation CP G = (V, E) is transformed into a real-valued vec"
+  },
+  {
+    "paper_id": "LI2023103017",
+    "chunk_id": 57,
+    "text": "tor \nx G \u2208 R d . d refers to the dimension of the vector. \n\nWe concatenate the node type and source code as the node em- \nbedding. Speci\ufb01cally, using the vocabulary model, the node type is \nencoded to a scalar l v . As for the source code in a node, it is parsed \ninto  a  token  sequence  c = ( s 1 , s 2 , \u00b7 \u00b7 \u00b7 , s n ) .  Each  token  is  encoded \ninto a vector x s \u2208 R d (cid:7) \nusing pre-trained word vectors, where d (cid:7)  is \nthe dimension of the word vectors. After concatenating the node"
+  },
+  {
+    "paper_id": "LI2023103017",
+    "chunk_id": 58,
+    "text": " \ntype and source code, we obtain the node embedding x v \u2208 R d (cid:7) +1 : \n\n(cid:2)\nx v = concat \n\n(cid:3) \n\n(cid:4)\nx s \n\nl v , \n\n1 \nn \n\n(1) \n\nLet m be the number of nodes and k be the number of edge \ntypes. The node features on a CPG can be represented by a ma- \ntrix X \u2208 R m \u00d7(d (cid:7) +1) , and the edges can be described by an adjacent \nmatrix A \u2208 { 0 , 1 } k \u00d7m \u00d7m \n. The adjacent matrix A de\ufb01nes how infor- \nmation propagates and aggregates on the graph representation. \n\nT \nv , 0 ] \n\nThen,"
+  },
+  {
+    "paper_id": "LI2023103017",
+    "chunk_id": 59,
+    "text": " GGNN is applied to the CPG to learn syntactic and seman- \n(1) \nv  = \ntic information. Firstly, we initialize the node state vector h \nby padding x v  with extra  0s,  where h v \u2208 R z ,  z > d (cid:7) + 1 . \n[ x T \nThen, we learn the structure information according to the adjacent \nmatrix A . Let T  be the total number of time-step for neighborhood \naggregation. For each node v at a time-step t \u2208 T , its hidden state \n\n5\n\nvector a \n\n(t) \nv  = \na \n\n(t) \nv  \u2208 R z is calculated by \n(cid:3) \nW p h t"
+  },
+  {
+    "paper_id": "LI2023103017",
+    "chunk_id": 60,
+    "text": "\u22121 \nu \n\n(cid:3) \n\np \n\n(u, v ) \u2208 A p \n\n(2) \n\nwhere W p \u2208 R z\u00d7z  is the weight to be learned, h t\u22121 \nis the hidden \nstate of the node v \u2019s neighbor u at time-step t \u2212 1 . p denotes the \np -th edge on the CPG and A p \u2208 R m \u00d7m is the adjacent matrix corre- \n(cid:5) \n\u2217 represents the aggregation of \nsponding to p. In Eq. (2) , the \ufb01rst \n\u2217 represents \nall neighbors de\ufb01ned by one edge, while the second \nthe aggregation of all edges of a node after the \ufb01rst aggregation. \n\n(cid:5) \n\nu \n\nNext, a gated rec"
+  },
+  {
+    "paper_id": "LI2023103017",
+    "chunk_id": 61,
+    "text": "urrent unit (GRU) is used to learn information \n\nfrom time-steps to get the current node\u2019s hidden state h t \n(cid:6)\nh t \nv = GRU \nwhere h t\u22121 \n\n(cid:7)\nv  , a t \nh t\u22121 \nv \n\nis the hidden state of the node v at the time-step t \u2212 1 . \nFinally, we get the sample\u2019s graph embedding x G \u2208 R d  after all \n\nv , i.e., \n\n(3) \n\nv \n\nT  time-steps by aggregating all nodes in the sample\u2019s CPG, i.e., \n\n(cid:3) \n\nx G = \n\nW G [ h v , x v ] \n\n(4) \n\nv \u2208 V \n\n5. Domain adaptation \n\nIn  the  real  world,  a  vulnera"
+  },
+  {
+    "paper_id": "LI2023103017",
+    "chunk_id": 62,
+    "text": "bility  detector  trained  on  \ufb01nite \ndatasets is required to be applied to projects that are brand new. \nTraditional  machine  learning  methods  assume  that  training  data \nand  test  data  obey  the  same  feature  distribution.  However,  due \nto  the  programming  style,  and  application  scenarios,  vulnerabil- \nity features in different domains may obey different distributions, \ncompromising the model\u2019s detection performance. In this section, \nusing data from the source and the target "
+  },
+  {
+    "paper_id": "LI2023103017",
+    "chunk_id": 63,
+    "text": "domains, we build a fea- \nf  transforms the graph embedding \nture generator G \nX G  into the \u201cdeep\u201d feature vector X F , which is discriminative for \nvulnerability  detection  and  invariant  with  the  shift  between  the \ndomains. Therefore, the objective function is de\ufb01ned as: \n\nf : X G \u2192 X F . G \n\n\u2217 = arg min \nf \n\n(cid:4) ( f (x i ) , y i ) + \u03bbR (B S , B T ) \n\n1 \nB \n\nB (cid:3) \n\ni =1 \n\n(5) \n\n\fX. Li, Y. Xin, H. Zhu et al. \n\nComputers & Security 125 (2023) 103017 \n\nTable 1 \nThe details of used"
+  },
+  {
+    "paper_id": "LI2023103017",
+    "chunk_id": 64,
+    "text": " datasets. \n\nDataset \n\nProject \n\nVulnerable \n\nClean \n\nTotal \n\nDevi \n\nReVe \n\nTotal \n\nFFmpeg \nQEMU \nDebian \nChrome \n- \n\n4981 \n7479 \n1415 \n825 \n14700 \n\n5016 \n7980 \n1653 \n911 \n15560 \n\n9997 \n15459 \n3068 \n1736 \n30260 \n\nFig. 3.  The overview of domain adaptation stage. \n\ncrepancy between domains, the objective function ( Eq. (5) ) is up- \ndated to \n\nwhere B represents the batch size, (cid:4) ( f (x \ni ) denotes the classi\ufb01- \ncation loss, B S and B T  are 2 batches in the source and target do- \nmain res"
+  },
+  {
+    "paper_id": "LI2023103017",
+    "chunk_id": 65,
+    "text": "pectively, R (\u2217, \u2217) measures the domain discrepancy. \u03bb is \nused to adjust the weight of classi\ufb01cation loss and domain discrep- \nancy. \n\ni ) , y \n\nIn this stage, the feature generator is learned using both labeled \ndata  S G = { (\u03d5(x ) , y ) | x, y \u2208 S} in  the  source  domain  and  unlabeled \ndata T G = { \u03d5(x ) | x \u2208 T } in the target domain. S G is utilized to learn \nthe discrimination for vulnerability detection. T G  and S G  are used \nto learn the invariance to the shift between domains. Let"
+  },
+  {
+    "paper_id": "LI2023103017",
+    "chunk_id": 66,
+    "text": " \u03b8 be the \nparameters to be optimized in the neural network. The gradient of \n\u03b8 when optimizing the objective function can be expressed as: \n\n\u2207\u03b8 = \n\n\u2202(cid:4) ( f ( x i ) y i ) \n\u2202\u03b8\n\n+ \u03bb\n\n\u2202R ( B s , B r ) \n\u2202\u03b8\n\n(6) \n\nTo  build  the  feature  generator  G \n\nf ,  an  architecture  shown  in \nFig. 3 is proposed. We decompose this architecture into 3 parts: \nthe feature generator G \n\nf , the classi\ufb01er G y , and the bottleneck G \n\nd . \n\nSpeci\ufb01cally,  G \n\nf  is  composed of  multi-feedforward neural  net"
+  },
+  {
+    "paper_id": "LI2023103017",
+    "chunk_id": 67,
+    "text": "- \nf \u2208 R d . \nworks, and maps the input x \u2208 X G into a new feature vector x \nThe inputs x S \u2208 S G and x T \u2208 T G that come from the source and the \ntarget domains are transformed into new features x S \nf . \nf  by G \nf  as input, the classi\ufb01er G y predicts the sample\u2019s label \n\nf and x T \n\nTaking x S \n\n\u02c6 y D and generates the classi\ufb01cation loss by cross-entropy L CE : \n(cid:6)\n(cid:8)\ny \u00b7 log \u02c6 y D + ( 1 \u2212 y ) log \nL CE = \u2212\n\n(cid:7)(cid:9)\n1 \u2212 \u02c6 y D \n\n(7) \n\nf  and x T \n\n\u2208 R d  and x T \nd \n\nd  trans"
+  },
+  {
+    "paper_id": "LI2023103017",
+    "chunk_id": 68,
+    "text": "forms x S \nG \n\nf  into new vectors x S \nd \n\n\u2208 R d \nand measures the discrepancy between them. To do so, Maximum \nMean Discrepancy (MMD) is utilized, which is based on the notion \nof embedding probabilities in a reproducing kernel Hilbert space. \nIntuitively, the central moment can be used to measure the dis- \ncrepancy between 2 probability distributions. However, 2 probabil- \nity distributions with the same \ufb01nite order central moment may \nnot be the same, such as 2 probability distributions that"
+  },
+  {
+    "paper_id": "LI2023103017",
+    "chunk_id": 69,
+    "text": " have the \nsame  mean  and  different  variance.  If  the  maximum  central  mo- \nments of any order are still the same, the two distributions can be \nconsidered identical. Let the batch sizes of input data in the source \nand the target domains be q and w . The MMD can be described by \n\n(cid:10)\n(cid:10)\n(cid:10)\n(cid:10)\nL M M D = \n(cid:10)\n\n1 \nq 2 \n\nq (cid:3) \n\nq (cid:3) \n\n(cid:6)\nk \n\n(cid:7)\ni , x S \nx S \ni (cid:7) \n\ni =1 \n\ni (cid:7) =1 \n\n+ \n\n1 \nw 2 \n\nw (cid:3) \n\nw (cid:3) \n\n(cid:6)\nk \n\nj=1 \n"
+  },
+  {
+    "paper_id": "LI2023103017",
+    "chunk_id": 70,
+    "text": "\nj (cid:7) =1 \n\nq (cid:3) \n\nw (cid:3) \n\n(cid:6)\nk \n\n(cid:7)\ni , x T \nx S \nj \n\ni =1 \n\nj=1 \n\n(8) \n\n\u2212 2 \nqw \n(cid:10)\n(cid:10)\n(cid:7)\n(cid:10)\nj , x T \nx T \n(cid:10)\nj (cid:7) \n(cid:10)\n\nH \n\ni , x \n\nj (cid:9) 2 /\u03c3 is  the  Gaussian  kernel  function \nwhere  k ( x \nthat maps a distribution into a reproducing kernel Hilbert space \n(cid:9) \u2217 (cid:9) \n\nj ) = \u2212(cid:9) x \n\ni \u2212 x \n\nH . \n\nAt  last,  using  cross-entropy  L CE  to  calculate  the  classi\ufb01cation \nloss and Maximum Mean Discrepancy L M M D  t"
+  },
+  {
+    "paper_id": "LI2023103017",
+    "chunk_id": 71,
+    "text": "o calculate the dis- \n\n6 \n\nB (cid:3) \n\n1 \nB \n\n\u2217 = arg min \nf \n\nL CE (G y (G \n\nf (x i )) , y i ) + \u03bbL M M D (G \n\nf (B S ) , G \n\nf (B T )) \n\ni =1 \n\n(9) \n\nBy optimizing the objective function, we transfer the vulnera- \nbility patterns learned in the source domain to the target domain. \n\n6. Classi\ufb01er \n\nIn the end, we build a classi\ufb01er \u03be : X \n\nf \u2192 Y  to generate the de- \ntection result. The classi\ufb01er \u03be takes x \nf ( \u03d5( x ) ) as input. That is, \nx \nf  is produced by graph embedding and domain adaptatio"
+  },
+  {
+    "paper_id": "LI2023103017",
+    "chunk_id": 72,
+    "text": "n. Dur- \ning the training time, \u03be is built by the labeled data in the source \ndomain. \n\nf = G \n\nIn the cross-domain vulnerability detection tasks, VulGDA pre- \ndicts the label  \u02c6 y of the test data x T \u2208 T  in the target domain after \ngraph embedding, domain adaptation, and classi\ufb01er: \n\u02c6 y = \u03be\n\n(cid:7)\nf ( \u03d5 ( x ) ) \nG \n\n(10) \n\n(cid:6)\n\n7. Experiments \n\n7.1. Experimental setup \n\n7.1.1. Evaluation metrics \n\n(cid:11) \n\nTo verify the effectiveness of the proposed method, we select \nAccuracy  Acc = "
+  },
+  {
+    "paper_id": "LI2023103017",
+    "chunk_id": 73,
+    "text": "(T P + T N) / (T P + F P + T N + F N) ,  Precision  P r = \nT P/ (T P + F P ) ,  Recall  Rc = T P/ (T P + F N) ,  F1-score  F 1 = (2 \u2217 P r \u2217\nRc) / (P r + Rc) ,  and  Matthews  Correlation  Coe\ufb03cient  Mcc = (T P \u00d7\nT N \u2212 F P \u00d7 F N) / \n(T P + F P ) \u00d7 (T P + F N) \u00d7 (T N + F P ) \u00d7 (T N + F N) \nas evaluation metrics. T P denotes the number of samples correctly \npredicted as vulnerabilities. F P  represents the number of samples \nincorrectly predicted as vulnerabilities. T N is the number of sam- \nples "
+  },
+  {
+    "paper_id": "LI2023103017",
+    "chunk_id": 74,
+    "text": "correctly predicted to be normal. F N refers to the number of \nvulnerability samples that are wrongly predicted to be normal. \n\n7.1.2. Dataset \n\nIn this paper, Devi dataset ( Zhou et al., 2019 ) and ReVe dataset \n( Chakraborty  et  al.,  2021 )  are  used  for  experiments.  The  former \nconsists of vulnerabilities from FFmpeg and QEMU, while the latter \nconsists of vulnerabilities from Debian and Chrome. The details of \nthe used datasets are shown in \n\nTable  1 .  We  make  the  datasets  used "
+  },
+  {
+    "paper_id": "LI2023103017",
+    "chunk_id": 75,
+    "text": " in  this  paper  public  at \nhttps://drive.google.com/\ufb01le/d/1RALujlx6JZYd84VvolLhkCgQPj13tC-t/ \nview?usp=sharing . \n\nThe  datasets  come  from  4  different  types  of  software:  FFm- \npeg, QEMU, Debian, and Chrome. They are multimedia player, ma- \nchine emulator, operating system, and browser respectively. There \nare  several  reasons  for  choosing  Devi  and  ReVe  as  experimental \ndatasets. The \ufb01rst one is that they are manually labeled so that \nthey could provide accurate supervised info"
+  },
+  {
+    "paper_id": "LI2023103017",
+    "chunk_id": 76,
+    "text": "rmation. Some datasets, \nsuch  as  Draper  ( Russell  et  al.,  2018 ),  are  labeled  by  traditional \n\n\fX. Li, Y. Xin, H. Zhu et al. \n\nTable 2 \nIn-domain vulnerability detection performance. \n\nDomain  Method \n\nAcc (%) \n\nPr (%) \n\nRc (%) \n\nF1 (%)  Mcc \n\nReVe \n\nDevi \n\nVulDeePecker \nSySeVr \nDevign \nVulGDA \nVulDeePecker \nSySeVr \nDevign \nVulGDA \n\n59.43 \n57.81 \n68.18 \n73.75 \n56.28 \n55.34 \n64.82 \n67.55 \n\n57.27 \n56.48 \n65.59 \n78.17 \n56.56 \n53.79 \n65.84 \n67.25 \n\n74.29 \n68.13 \n76.68 \n65.68 \n54.04 \n75.66 "
+  },
+  {
+    "paper_id": "LI2023103017",
+    "chunk_id": 77,
+    "text": "\n61.81 \n68.05 \n\n64.68 \n61.76 \n70.70 \n71.38 \n55.28 \n62.87 \n63.76 \n67.65 \n\n0.1975 \n0.1597 \n0.3687 \n0.4808 \n0.1258 \n0.1169 \n0.2970 \n0.3511 \n\nstatic analysis tools, compromising their accuracy. Second, this pa- \nper aims to detect vulnerabilities in real-world software. Thus, syn- \nthetic  datasets, such  as  SARD  ( Li et  al.,  2022 ), are excluded  due \nto their simplistic functionalities. Last, the number of vulnerabil- \nity  samples  in  Devi  and  ReVe  is  relatively  rich.  Some  datasets \n("
+  },
+  {
+    "paper_id": "LI2023103017",
+    "chunk_id": 78,
+    "text": " Lin  et  al.,  2021 )  only  contain  a  small  number  of  vulnerabilities \nof the corresponding software project, making it di\ufb03cult to train \na machine learning model. \n\n7.1.3. Implementation details \n\nWe  run  all  experiments  on  ThinkStation  P920  equipped  with \nIntel(R)  Xeon(R)  Silver  4116  CPU  @  2.10GHz,  128G  RAM,  Nvidia \nQuadro P50 0 0 GPU. The detection model is implemented in Python \n3.7.10 and Pytorch 1.7.1. \n\nWe decompose VulGDA to graph embedding and domain adap- \ntation"
+  },
+  {
+    "paper_id": "LI2023103017",
+    "chunk_id": 79,
+    "text": ". In the graph embedding stage, we build the graph-based \nintermediate representation using relations extracted by the static \nanalysis tool  Joern  ( ShiftLeftSecurity 2022 ). Word2Vec  is  utilized \nfor node embedding, and each node in a graph representation is \nrepresented by a 100-dimensional vector. In the domain adapta- \ntion stage, the feature generator G \nf  is composed of a fully con- \nnected neural network with 3 layers (256, 128, 256). G y is a 2-layer \nfull connected neural network w"
+  },
+  {
+    "paper_id": "LI2023103017",
+    "chunk_id": 80,
+    "text": "ith 2-dimensional output. We use \ncross-entropy to calculate the classi\ufb01cation loss. G \nd is a 2-layer full \nconnected neural network with 256-dimensional output, and uses \nMMD to measure the domain discrepancy. Different from the in- \ndomain detection method ( Russell et al., 2018 ; Lin et al., 2017 ) and \nFew-Shot learning methods ( Lin et al., 2021 ; Liu et al., 2020 ), we \nuse G y  in the domain adaptation stage as the \ufb01nal classi\ufb01er. The \nneural network is trained by the early stop method, "
+  },
+  {
+    "paper_id": "LI2023103017",
+    "chunk_id": 81,
+    "text": "where the pa- \ntience is set to 5 and the monitor is set on Accuracy. \n\n7.2. In-domain vulnerability detection performance \n\nTo  verify  VulGDA\u2019s  ability  to  learn  vulnerability  patterns,  we \nconduct experiments in the in-domain vulnerability detection sce- \nnario, where most detection methods focus. VulDeePecker ( Li et al., \n2018 ), SySeVr ( Li et al., 2022 ) and Devign ( Zhou et al., 2019 ) are \nused as the baselines. The \ufb01rst two are sequence-based detection \nmethods, while the last one"
+  },
+  {
+    "paper_id": "LI2023103017",
+    "chunk_id": 82,
+    "text": " represents the graph-based detection \nmethod. They are implemented based on the open-source project \n( Chakraborty et al., 2021 ). In this section, we conduct in-domain \nvulnerability detection experiments on ReVe and Devi datasets re- \nspectively. Every method is carried out in a situation where train- \ning data and test data belong to the same domain. VulGDA\u2019s per- \nformance in ReVe is achieved in the condition where the model \nis trained on ReVe (source domain) and Devi (target domain), and "
+  },
+  {
+    "paper_id": "LI2023103017",
+    "chunk_id": 83,
+    "text": "\ntests on ReVe. Similarly, VulGDA\u2019s performance in Devi is achieved \nin  the  condition  where  the  model  takes  Devi  as  the  source  do- \nmain and Reve as the target domain, and tests on Devi. The re- \nsults  of  in-domain  vulnerability  detection  experiments  are  listed \nin Table 2 . Since Devign is not open source, its results are repli- \ncated based on the open-source project ( Chakraborty et al., 2021 ) \nand ( Pinconschi, 2022 ). \n\nComputers & Security 125 (2023) 103017 \n\nAs shown in"
+  },
+  {
+    "paper_id": "LI2023103017",
+    "chunk_id": 84,
+    "text": " Table 2 , sequence-based methods perform poorly \nin  both  2  datasets.  The  Accuracy  and  MCC  of  VulDeePecker  is \n59.43%  and  0.1975  in  ReVe  datasets,  56.28%  and  0.1258  in  Devi \ndataset. SySeVr\u2019s performance is even lower than that of VulDeeP- \necker. That is because the datasets used in this paper are labeled \nat the function level so that they cannot provide precise location \ninformation.  Unfortunately,  SySeVr  is  susceptible  to  coarse  gran- \nularity because it searches f"
+  },
+  {
+    "paper_id": "LI2023103017",
+    "chunk_id": 85,
+    "text": "or all possible potential slicing crite- \nria  by  traversing the  whole  sample.  It  is  worth  mentioning that \ntheir performance is lower than that in their papers. The reason \nis  that  the  datasets  used  in  their  papers  are  synthetic,  whereas \nthis paper considers the generalization of the model and uses real- \nworld vulnerability samples as datasets. Compared with VulDeeP- \necker, the graph-based method Devign achieves an improvement \nof 8.75%, 6.02%, 0.1712 on Accuracy, F1 score, "
+  },
+  {
+    "paper_id": "LI2023103017",
+    "chunk_id": 86,
+    "text": "Mcc in ReVe dataset, \nand 8.54%, 8.48%, 0.1712 on Accuracy, F1 score, Mcc in Devi dataset. \nThis is because the application of graph embedding prevents De- \nvign from structural limitations. \n\nIn Reve, although its Recall is 11% lower than that of Devign, \nVulGDA has a comprehensive performance and achieves Accuracy, \nPrecision, F1 score, and Mcc of 73.75%, 78.17%, 71.38, and 0.4808 \nrespectively. In Devi, the Accuray and MCC of VulGDA reach 67.55% \nand  0.3511,  which  outperform  other  models"
+  },
+  {
+    "paper_id": "LI2023103017",
+    "chunk_id": 87,
+    "text": ".  Considering  the  re- \nsults in these two datasets, it can be concluded that graph embed- \nding and representation learning methods proposed in this paper \nhave powerful vulnerability pattern learning abilities. \n\n7.3. Comparison of different embedding methods \n\nTo verify the effect of the graph embedding method proposed \nin this paper, different embedding methods are carried out in ReVe \nand Devi datasets. The results are summarized in Fig. 4 . We chose \nthe sequence-based method (Sequence),"
+  },
+  {
+    "paper_id": "LI2023103017",
+    "chunk_id": 88,
+    "text": " tree-based method (AST), \nand graph-based methods (DFG, CFG) as baselines. They are car- \nried out under the same condition except for the embedding stage. \nSpeci\ufb01cally,  Sequence  \ufb02attens  the  sample  into  a  linear  sequence \naccording  to  the  appearance  order  of  elements.  AST  is  the  Ab- \nstract Syntax Tree, whose root node represents the whole function \nand the leaf node represents a single token. The non-leaf node is \ncomposed  of  its  child  nodes.  Therefore,  the  edges  in  "
+  },
+  {
+    "paper_id": "LI2023103017",
+    "chunk_id": 89,
+    "text": "AST  repre- \nsent the subordination between elements. DFG is the Data Flow \nGraph that takes statements as nodes and data dependency rela- \ntionships as edges. CFG is the Control Flow Graph that takes state- \nments  as  nodes  and  control  dependency  relationships  as  edges. \nAs  can  be  seen  from  the  description,  AST,  CFG,  and  DFG  dis- \nplays  the  syntax  information,  control  \ufb02ow,  and  data  \ufb02ow  of  the \nsource code respectively. CPG  represents the embedding method \nproposed i"
+  },
+  {
+    "paper_id": "LI2023103017",
+    "chunk_id": 90,
+    "text": "n Section 4 , another graph-based method that combines \nAST and DFG, and CFG in a graph. All methods utilize a full con- \nnection layer as the classi\ufb01er. In Fig. 4 , Sequence is implemented \nby Li et al. (2018) , while other methods use Joern to extract ele- \nment relationships and GGNN to aggregate information. \n\nFrom  Fig.  4  we  can  see  that  although  it  has  the  best  Recall, \nthe sequence-based method has poor Accuracy, Precision, and F1 \nbecause  of  its  limited  structural  form.  "
+  },
+  {
+    "paper_id": "LI2023103017",
+    "chunk_id": 91,
+    "text": "The  high  Recall  and  low \nPrecision indicate that the sequence-based method tends to clas- \nsify  a  sample  into  a  positive  one,  leading  to  a  high  false  posi- \ntive.  The  tree-based  approach  AST  performs  slightly  better  than \nSequence. Although AST represents syntactic information using its \ntree structure, it dramatically increases the size of elements, weak- \nening the learning of semantic relationships. Graph-based meth- \nods, DFG, CFG, and CPG, outperform the aforemention"
+  },
+  {
+    "paper_id": "LI2023103017",
+    "chunk_id": 92,
+    "text": "ed sequence- \nbased  and  tree-based  approaches.  Different  from  Sequence  and \nAST, they utilize \ufb02exible structures to represent vulnerability in- \nformation. In the ReVe domain, CPG achieves Accuracy, Precision, \nand F1 score of 68.44%, 69.62%, and 67.28% respectively, which are \n\n7\n\n\fX. Li, Y. Xin, H. Zhu et al. \n\nComputers & Security 125 (2023) 103017 \n\nFig. 4.  Comparison between 5 different embedding methods on ReVe and Devi datasets. \n\nTable 3 \nPerformance of VulGDA with different perc"
+  },
+  {
+    "paper_id": "LI2023103017",
+    "chunk_id": 93,
+    "text": "entages of source do- \nmain data used for training. \n\nFashion \n\nAcc (%) \n\nPr (%) \n\nRc (%) \n\nF1 (%)  Mcc \n\nw/o DA \nZero-Shot \n20% \n50% \n80% \nIn-domain \n\n56.74 \n63.74 \n65.35 \n69.81 \n71.44 \n73.75 \n\n55.08 \n67.80 \n69.52 \n64.33 \n69.00 \n78.17 \n\n73.09 \n52.34 \n54.68 \n86.85 \n79.78 \n65.68 \n\n62.82 \n59.08 \n61.21 \n73.91 \n74.00 \n71.38 \n\n0.1427 \n0.2823 \n0.3143 \n0.4249 \n0.4325 \n0.4808 \n\nslightly higher than the other 2 graph-based methods. In the Devi \ndomain, CPG achieves the best Accuracy, Precision, and F1 sc"
+  },
+  {
+    "paper_id": "LI2023103017",
+    "chunk_id": 94,
+    "text": "ore, \nwhich is 5.84%, 7.72%, and 2.76% higher than that  of CFG.  Com- \npared with other structures, more syntactic and semantic relation- \nships are integrated into CPG. The experimental results show that \ngraph-based embedding methods and comprehensive information \nare effective in promoting the model\u2019s detection performance. \n\n7.4. Performance in different cross-domain fashions \n\nIn the real world, a vulnerability detector may work in different \ncross-domain fashions. Among them, in-domain de"
+  },
+  {
+    "paper_id": "LI2023103017",
+    "chunk_id": 95,
+    "text": "tection, where \ntraining data and test data belong to the same domain, is the sim- \nplest one. Although ideal performance can be made, this fashion \nis  di\ufb03cult  to  be  satis\ufb01ed  in  practical  application.  The  reason  is \nthat \ufb01nite training data cannot cover all software projects in the \nreal world. Therefore, a more common scenario is that the learned \nmodel is applied to projects independent of training data. The tar- \nget domain may have few or no historical vulnerabilities that can \nbe "
+  },
+  {
+    "paper_id": "LI2023103017",
+    "chunk_id": 96,
+    "text": "used for training. With the variation of supervised information \nin  the  target  domain  for  training,  the  detection  model  may  en- \ncounter different training di\ufb03culties. \n\nIn this section, we conduct experiments to verify VulGDA\u2019s per- \nformance in different cross-domain fashions. The results are listed \nin Table 3 . w/o DA represents the fashion that VulGDA without do- \nmain adaptation stage is trained in the source domain and tested \nin the target domain. It is used as the baseline to "
+  },
+  {
+    "paper_id": "LI2023103017",
+    "chunk_id": 97,
+    "text": "show the per- \nformance of a traditional graph-based method in a Zero-Shot fash- \nion. Except for w/o DA, the other results are obtained using the \ncomplete VulGDA. Zero-Shot denotes the fashion that no labeled \ndata in the target domain can be used for training the model. 20%, \n50%,  and  80%  denote  the  percentages  of  the  target  domain\u2019s  la- \nbeled data that are used for training. They are designed to sim- \nulate different Few-Shot fashions. In-domain refers to the situation \nwhere the "
+  },
+  {
+    "paper_id": "LI2023103017",
+    "chunk_id": 98,
+    "text": "training data and test data belong to the same domain. \nFrom Table 3 we can see that VulGDA in the w/o DA fashion has \nthe lowest Accuracy, Precision, F1, and Mcc. Although it has a high \n\n8 \n\nRecall and F1, its Precision is signi\ufb01cantly lower than other fash- \nions. This is because, without domain adaptation, VulGDA degrades \ninto a traditional graph-based method. It suffers from the diver- \ngence between domains. In the Zero-Shot fashion, VulGDA\u2019s Accu- \nracy, Precision, and Mcc reach 63.74%, "
+  },
+  {
+    "paper_id": "LI2023103017",
+    "chunk_id": 99,
+    "text": "67.80%, and 0.2823, which \nare 7.00%, 12.44%, 0.1396 higher than that in the w/o DA fashion. \nVulGDA\u2019s domain adaptation stage narrows down the gap between \ndomains. VulGDA\u2019s performance gets improved with the increased \nproportion of the target domain\u2019s supervised information. In the \n50% fashion, VulGDA\u2019s Accuracy and Mcc reach 69.81% and 0.4249, \nwhich is 6.07% and 0.1426 higher than that in the Zero-Shot fash- \nion. When  80%  of  the  target  domain\u2019s  supervised  information  is \nutilized,"
+  },
+  {
+    "paper_id": "LI2023103017",
+    "chunk_id": 100,
+    "text": " Accuracy and Mcc are improved by 7.70% and 0.1502, com- \npared with the Zero-Shot fashion. In the In-domain fashion, Vul- \nGDA reaches the best performance. The results in Table 3 indicate \nthat the domain adaptation improves the model\u2019s performance in \ncross-domain vulnerability detection. In all cross-domain fashions, \nZero-Shot is the hardest one for domain adaptation. And the in- \ncrease of the target domain\u2019s supervised information improves the \ndetector\u2019s performance. The increased data i"
+  },
+  {
+    "paper_id": "LI2023103017",
+    "chunk_id": 101,
+    "text": "n the target domain for \ntraining prevent the model from the gap between domains. Fur- \nthermore, it can be concluded that VulGDA is also suitable for the \nFew-Shot fashion when supervised information in the target do- \nmain is available. \n\n7.5. Comparative analysis \n\nAs shown in the previous section, Zero-Shot is the hardest case \nfor  cross-domain  vulnerability  detection.  The  model  works  in  a \nZero-Shot fashion and is also suitable for the detection in a Few- \nShot fashion by adding the"
+  },
+  {
+    "paper_id": "LI2023103017",
+    "chunk_id": 102,
+    "text": " target domain\u2019s supervised information \ninto the training data. Better performance will be achieved in the \nFew-Shot fashion. To verify the cross-domain vulnerability detec- \ntion effect of the proposed method, we conduct comparative ex- \nperiments in a Zero-Shot fashion. Experiments are carried out in 3 \ncross-domain conditions. QEMU + FFmpeg \u2192 ReVe refers to the con- \ndition that QEMU and FFmpeg are the source domain and ReVe \nis the target domain. ReVe + FFmpeg \u2192 QEMU denotes the condition \n"
+  },
+  {
+    "paper_id": "LI2023103017",
+    "chunk_id": 103,
+    "text": "that  ReVe  and  FFmpeg  constitute  the  source  domain  and  QEMU \nis the target domain. ReVe + QEMU \u2192 FFmpeg refers to the condi- \ntion that ReVe and QEMU make up the source domain and FFmpeg \nserves as the target domain. \n\nAs  shown  in  Table  4 ,  VulDeePecker  ( Li  et  al.,  2018 ),  SySeVr \n( Li  et  al.,  2022 ),  Devign  ( Zhou  et  al.,  2019 ),  Reveal[9],  IVDETECT \n( Li et al., 2021 ; Lin et al. (2018) and SCDAN ( Nguyen et al., 2019 ) \nare chosen as baselines. Speci\ufb01cally, VulDee"
+  },
+  {
+    "paper_id": "LI2023103017",
+    "chunk_id": 104,
+    "text": "Pecker and SySeVr are \ntraditional sequence-based detection methods that transform the \nsource code into a sequence and apply neural networks to it. The \n\n\fX. Li, Y. Xin, H. Zhu et al. \n\nComputers & Security 125 (2023) 103017 \n\nTable 4 \nComparison between VulGDA and existing methods in different cross-domain conditions. \n\nDomain \n\nQEMU + \nFFmpeg \n\u2192 \nReVe \n\nReVe + \nFFmpeg \n\u2192 \nQEMU \n\nReVe + \nQEMU \n\u2192 \nFFmpeg \n\nMethod \n\nAcc (%) \n\nVulDeePecker \nSySeVr \nDevign \nReveal \nIVDETECT \nLin et al. (2018) \nSCD"
+  },
+  {
+    "paper_id": "LI2023103017",
+    "chunk_id": 105,
+    "text": "AN \nVulGDA \nVulDeePecker \nSySeVr \nDevign \nReveal \nIVDETECT \nLin et al. (2018) \nSCDAN \nVulGDA \nVulDeePecker \nSySeVr \nDevign \nReveal \nIVDETECT \nLin et al. (2018) \nSCDAN \nVulGDA \n\n54.70 \n53.90 \n56.64 \n57.23 \n57.59 \n55.90 \n56.83 \n63.74 \n54.97 \n54.19 \n57.73 \n58.66 \n58.41 \n55.73 \n58.39 \n64.33 \n54.22 \n54.29 \n55.61 \n58.15 \n59.85 \n56.53 \n61.61 \n64.82 \n\nPr (%) \n\n54.16 \n52.92 \n55.03 \n55.75 \n56.68 \n54.74 \n56.11 \n67.80 \n54.88 \n54.49 \n56.56 \n57.87 \n57.32 \n55.13 \n58.36 \n66.78 \n51.89 \n53.16 \n55.74 \n55.68 \n59.54"
+  },
+  {
+    "paper_id": "LI2023103017",
+    "chunk_id": 106,
+    "text": " \n55.78 \n60.31 \n65.84 \n\nRc (%) \n\n61.20 \n70.79 \n71.93 \n70.13 \n67.49 \n68.08 \n62.92 \n52.34 \n56.28 \n50.85 \n66.86 \n63.54 \n65.93 \n61.37 \n58.19 \n57.02 \n59.88 \n72.44 \n54.40 \n79.64 \n61.11 \n63.16 \n67.54 \n61.81 \n\nF1 (%) \n\n57.47 \n60.57 \n62.36 \n62.12 \n61.62 \n66.70 \n59.32 \n59.08 \n55.57 \n52.61 \n61.28 \n60.58 \n61.32 \n58.09 \n58.27 \n61.51 \n55.60 \n61.32 \n55.06 \n65.54 \n60.32 \n59.23 \n63.72 \n63.76 \n\nMcc \n\n0.0949 \n0.0829 \n0.1400 \n0.1497 \n0.1620 \n0.1217 \n0.1376 \n0.2823 \n0.0994 \n0.0840 \n0.1573 \n0.1746 \n0.1702 \n0.1153 \n0."
+  },
+  {
+    "paper_id": "LI2023103017",
+    "chunk_id": 107,
+    "text": "1679 \n0.2897 \n0.0896 \n0.0919 \n0.1122 \n0.1806 \n0.1972 \n0.1318 \n0.2339 \n0.2970 \n\nformer uses data \ufb02ow analysis to generate the sequence, while the \nlatter utilizes data and control dependency analysis to generate the \nsequence. Devign, Reveal, and IVDETECT are graph-based detection \nmethods. Devign takes CPG as the intermediate representation and \nlearns vulnerable patterns using GGNN and CNN. Reveal is a met- \nric learning method that utilizes Triplet loss to enhance the abil- \nity to distinguish"
+  },
+  {
+    "paper_id": "LI2023103017",
+    "chunk_id": 108,
+    "text": " different types of samples. IVDETECT transforms \nthe source code into PDG and uses GCN with feature-attention for \nclassi\ufb01cation. The \ufb01rst 5 methods are designed under the assump- \ntion that the training data and test data obey the same distribu- \ntion. \u201cLin et al.\u201d is a shallow tree-based cross-domain vulnerabil- \nity detection method that transforms the source code into a se- \nquence by serializing AST via depth-\ufb01rst traversal. After pretrain- \ning in the source domain, it applies the trained"
+  },
+  {
+    "paper_id": "LI2023103017",
+    "chunk_id": 109,
+    "text": " model to detect \ncross-domain  vulnerabilities.  \u201cLin  et  al.\u201d is  reproduced  based  on \nLin  et  al.  (2018)  and  Lin  et  al.  (2017) .  We  select  speci\ufb01c  types \nof  nodes  to  maintain  consistency  with  the  serialized  results  of \nCodeSensor used by Lin et al. SCDAN is a sequence-based detec- \ntion method and detect cross-domain vulnerabilities in a Zero-Shot \nfashion. Few-Shot learning methods are excluded, such as Lin et al. \n(2021) -[43],  because  they  will  degrade  into  tra"
+  },
+  {
+    "paper_id": "LI2023103017",
+    "chunk_id": 110,
+    "text": "ditional  methods \nwhen supervised information in the target domain is unavailable. \nThe cross-domain vulnerability detection results are summarized \nin Table 4 . \n\nFrom Table 4 we can see that traditional sequence-based meth- \nods  VulDeePecker  and  SySeVr  have  the  worst  performance  in \nall  3  scenarios.  This  is  because  sequence-based  methods  suf- \nfer  from  long-term  dependency  and  semantic  loss,  weakening \nthe  learning  for  vulnerability  pattern.  In  addition,  their  p"
+  },
+  {
+    "paper_id": "LI2023103017",
+    "chunk_id": 111,
+    "text": "erfor- \nmances are compromised because they are designed without con- \nsideration of the distribution gap between the training data and \nthe  test  data.  Graph-based  methods,  Devign,  Reveal,  and  IVDE- \nTECT  outperform  VulDeePecker  and  SySeVr  because  of  the  ad- \nvantage of the graph structure to represent the vulnerability fea- \ntures. In QEMU + FFmpe \u2192 ReVe and ReVe + QEMU \u2192 FFmpeg, IVDE- \nTECT  outperforms  the  other  2  graph-based  methods,  and  in \nReVe + FFmpeg \u2192 QEMU scenar"
+  },
+  {
+    "paper_id": "LI2023103017",
+    "chunk_id": 112,
+    "text": "io Reveal achieves Accuracy and MCC \nof 58.46% and 0.1746, which are the best performance in 3 graph- \nbased methods. \n\nSCDAN, a sequence-based cross-domain method, performs bet- \nter than VulDeePecker and SySeVr because it adopts the deep do- \n\nmain adaptation besides the sequence-based representation learn- \ning.  In  ReVe + FFmpeg \u2192 QEMU  and  ReVe + QEMU \u2192 FFmpeg,  SC- \nDAN  achieves  Accuracy  of  58.39%  and  61.61%,  which  outperform \nthe  graph-based  methods  Devign  and  ReVeal.  Desp"
+  },
+  {
+    "paper_id": "LI2023103017",
+    "chunk_id": 113,
+    "text": "ite  being  a \nsequence-based method, the application of domain adaptation pre- \nvents  SCDAN  from  divergence  between  domains.  The  Accuracy \nof  Lin  et  al.,  another  cross-domain  detection  method,  is  55.90%, \n55.73%,  and  56.53%  respectively  in  3  scenarios,  somewhere  be- \ntween sequence-based methods and traditional graph-based meth- \nods.  It  uses  a  shallow  tree-based  representation  learning  and \nmodel migration method to detect cross-domain vulnerability, lim- \niting"
+  },
+  {
+    "paper_id": "LI2023103017",
+    "chunk_id": 114,
+    "text": " its performance. \n\nVulGDA  achieves  Accuracy  and  Mcc  of  63.74%  and  0.2823  in \nQEMU + FFmpeg \u2192 ReVe,  which  are  6.91%  and  0.1477  higher  than \nthat of another Zero-Shot learning method SCDAN, and 7.84% and \n0.1606  higher  than  that  of  Lin  et  al.  In  ReVe + FFmpeg \u2192 QEMU, \nVulGDA\u2019s Accuracy and Mcc reach 64.33% and 0.2897, which are \n5.67%-10.14% and 0.1151-0.2057 higher than comparative methods. \nIn ReVe + FFmpeg \u2192 QEMU, VulGDA achieves 3.21% and 0.0631 im- \nprovements on Acc"
+  },
+  {
+    "paper_id": "LI2023103017",
+    "chunk_id": 115,
+    "text": "uracy and MCC compared with SCDAN. \n\nCompared  with  traditional  graph-based  methods  Devign,  Re- \nVeal, and IVDETECT, VulGDA still has a better performance. Its Ac- \ncuracy is improved by 6.15%-7.10%, 5.67%-6.60%, 4.97%-9.21% than \nthat of traditional graph-based methods in 3 scenarios. This is be- \ncause VulGDA combines graph embedding and domain adaptation. \nGraph  embedding  enables  VulGDA  to  learn  comprehensive  syn- \ntactic and semantic information from source code, while domain \nad"
+  },
+  {
+    "paper_id": "LI2023103017",
+    "chunk_id": 116,
+    "text": "aptation promotes the emergence of features that are both dis- \ncriminative for vulnerability detection and invariant to the shift be- \ntween domains. To sum up, the experimental results show that our \nproposed method using graph embedding and domain adaptation \nis competitive with state-of-the-art approaches and works well in \ncross-domain vulnerability detection under a cold start condition. \n\n8. Conclusion \n\nThis paper studies cross-domain vulnerability detection in real- \nworld software unde"
+  },
+  {
+    "paper_id": "LI2023103017",
+    "chunk_id": 117,
+    "text": "r the condition that there is no labeled data \nin the target domain for training. We propose a detection model \nVulGDA that combines graph embedding and deep domain adapta- \ntion. Graph embedding stage maps samples in the source code into \n\n9 \n\n\fX. Li, Y. Xin, H. Zhu et al. \n\nComputers & Security 125 (2023) 103017 \n\nreal-valued vectors by aggregating information from neighbors and \nedges on a graph, relieving the long-term dependency and seman- \ntic loss. The domain adaptation stage learns featu"
+  },
+  {
+    "paper_id": "LI2023103017",
+    "chunk_id": 118,
+    "text": "res that combine \ndiscrimination and domain-invariance by deep domain adaptation. \nWe perform a systematic experiment to validate the effectiveness \nof VulGDA. The results show that our method has an improvement \nover the existing methods in cross-domain vulnerability detection. \nSeveral  limitations  hinder  the  performance  of  our  proposed \nmethod. On the one hand, VulGDA takes the mean of all token vec- \ntors in a node as the node embedding. This approach tends to lose \nimportant vulnerabi"
+  },
+  {
+    "paper_id": "LI2023103017",
+    "chunk_id": 119,
+    "text": "lity information in a node, such as the calls for \nkey functions. Therefore, designing a graph neural network model \nsuitable for graph embedding is a potential future work. On the \nother hand, VulGDA only uses the data in one source domain to \ntrain a neural network, which hinders its performance when la- \nbeled data belongs to multiple domains. Hence, another potential \nresearch is to improve the domain adaptation method suitable for \nmultiple source domains. \n\nThe proposed method can be gener"
+  },
+  {
+    "paper_id": "LI2023103017",
+    "chunk_id": 120,
+    "text": "alized and applied to similar \nproblems where training data and test data obey different distribu- \ntions, such as cross-language vulnerability detection tasks. The in- \ntuition is that some vulnerability types are ubiquitous in different \nlanguages, such as injection vulnerability. By applying the method \nproposed in this paper, vulnerability detection performance can be \nimproved in the target programming language environment where \nlabeled training data are scarce. \n\nDeclaration of Competing "
+  },
+  {
+    "paper_id": "LI2023103017",
+    "chunk_id": 121,
+    "text": "Interest \n\nThe authors declare that they have no con\ufb02icts of interest to \n\nreport regarding the present study. \n\nThe authors declare that they have no known competing \ufb01nan- \ncial interests or personal relationships that could have appeared to \nin\ufb02uence the work reported in this paper. \n\nData availability \n\nI have shared the link to my data at the Attatch File step \n\nAcknowledgments \n\nThis work was supported by the National Key R&D Program of \nChina (No. 2020YFB1708600 ), the Shandong Provincial "
+  },
+  {
+    "paper_id": "LI2023103017",
+    "chunk_id": 122,
+    "text": "Natural Sci- \nence Foundation (ZR2020YQ06), the Young innovation team of col- \nleges and universities in Shandong province (2021KJ001) and the \nFoundation of Guizhou Provincial Key Laboratory of Public Big Data \n(No.  2017BDKFJJ015 ,  No.  2018BDKFJJ008 ,  No.  2018BDKFJJ020 ,  No. \n2018BDKFJJ021 )."
+  }
+]

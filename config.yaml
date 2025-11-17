@@ -1,0 +1,14 @@
+paths:
+  papers_json: data/library/papers.json
+  hashes_json: data/library/hashes.json
+
+  # paragraph-level FAISS index
+  index_dir: data/index
+
+  # profile index
+  profile_index: data/profile_index
+
+  # sentence index
+  sentence_index: data/sentence_index
+
+  profiles_dir: data/profiles
